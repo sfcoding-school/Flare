@@ -11,7 +11,7 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
-import com.sfcoding.flare.MainActivity;
+import com.sfcoding.flare.Activity.MainActivity;
 import com.sfcoding.flare.R;
 
 public class GcmIntentService extends IntentService {

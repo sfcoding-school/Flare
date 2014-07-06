@@ -1,4 +1,4 @@
-package com.sfcoding.flare;
+package com.sfcoding.flare.Activity;
 
 import android.app.Activity;
 import android.content.Context;
@@ -35,6 +35,8 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.sfcoding.flare.Activity.ProfileActivity;
+import com.sfcoding.flare.R;
 
 import java.io.IOException;
 import java.security.MessageDigest;
@@ -42,7 +44,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
-public class MainActivity extends Activity implements  GooglePlayServicesClient.ConnectionCallbacks,
+public class MainActivity extends Activity implements GooglePlayServicesClient.ConnectionCallbacks,
         GooglePlayServicesClient.OnConnectionFailedListener {
     public static final String EXTRA_MESSAGE = "message";
     public static final String PROPERTY_REG_ID = "registration_id";
@@ -80,6 +82,7 @@ public class MainActivity extends Activity implements  GooglePlayServicesClient.
         mMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
         mMap.setMyLocationEnabled(true);
         mLocationClient = new LocationClient(this, this, this);
+        mLocationClient.connect();
         mDisplay = (TextView) findViewById(R.id.display);
         context = getApplicationContext();
 
@@ -93,7 +96,7 @@ public class MainActivity extends Activity implements  GooglePlayServicesClient.
 
 
         // start Facebook Login
-           /*Session.openActiveSession(this, true, new Session.StatusCallback() {
+           Session.openActiveSession(this, true, new Session.StatusCallback() {
 
                 // callback when session changes state
                 @Override
@@ -106,7 +109,7 @@ public class MainActivity extends Activity implements  GooglePlayServicesClient.
                             @Override
                             public void onCompleted(GraphUser user, Response response) {
                                 if (user != null) {
-                                    TextView welcome = (TextView) findViewById(R.id.welcome);
+                                    TextView welcome = (TextView) findViewById(R.id.display);
                                     welcome.setText("Hello " + user.getId() + "!");
                                 }
                             }
@@ -115,9 +118,10 @@ public class MainActivity extends Activity implements  GooglePlayServicesClient.
                 }
             });
             Intent intent = new Intent(this, ProfileActivity.class);
-            startService(intent);*/
+            startService(intent);
 
     }
+
     /*
      * Called by Location Services when the request to connect the
      * client finishes successfully. At this point, you can
@@ -127,12 +131,12 @@ public class MainActivity extends Activity implements  GooglePlayServicesClient.
     public void onConnected(Bundle dataBundle) {
         // Display the connection status
         Toast.makeText(this, "Connected", Toast.LENGTH_SHORT).show();
-        Location mLocation= new Location(mLocationClient.getLastLocation());
-        mLatLng= new LatLng(mLocation.getLatitude(),mLocation.getLongitude());
+        Location mLocation = new Location(mLocationClient.getLastLocation());
+        mLatLng = new LatLng(mLocation.getLatitude(), mLocation.getLongitude());
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mLatLng, 18));
         mMap.addMarker(new MarkerOptions()
                 .position(mLatLng)
-                .title("Hello world").icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_launcher)));
+                .title("Hello world!").icon(BitmapDescriptorFactory.fromResource(R.drawable.nexus)));
 
     }
 
@@ -178,15 +182,17 @@ public class MainActivity extends Activity implements  GooglePlayServicesClient.
              * If no resolution is available, display a dialog to the
              * user with the error.
              */
-            Log.e("error:",Integer.toString(connectionResult.getErrorCode()));
+            Log.e("error:", Integer.toString(connectionResult.getErrorCode()));
         }
     }
-     @Override
+
+    @Override
     protected void onStart() {
         super.onStart();
         // Connect the client.
-        mLocationClient.connect();
+
     }
+
     /*
      * Called when the Activity is no longer visible.
      */
@@ -196,7 +202,6 @@ public class MainActivity extends Activity implements  GooglePlayServicesClient.
         mLocationClient.disconnect();
         super.onStop();
     }
-
 
 
     public void onClick(final View view) {

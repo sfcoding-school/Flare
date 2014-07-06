@@ -39,7 +39,7 @@
             android:value="AIzaSyCv9BH_zHIPEjlUN68ZiBilu84vC6pq5hM"/>
 
         <activity
-            android:name=".MainActivity"
+            android:name=".Activity.MainActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -48,7 +48,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ProfileActivity"
+            android:name=".Activity.ProfileActivity"
             android:label="@string/title_activity_profile" />
 
         <receiver

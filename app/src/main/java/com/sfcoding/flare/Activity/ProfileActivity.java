@@ -1,4 +1,4 @@
-package com.sfcoding.flare;
+package com.sfcoding.flare.Activity;
 
 
 import android.app.Activity;
