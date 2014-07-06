@@ -9,20 +9,24 @@ import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import com.facebook.Session;
+import com.facebook.SessionState;
 import com.sfcoding.flare.R;
+
 import android.content.pm.Signature;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 
 public class ProfileActivity extends Activity {
+    Session session;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-
     }
 
 
