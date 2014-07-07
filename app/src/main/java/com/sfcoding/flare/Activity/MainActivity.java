@@ -89,7 +89,8 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
         if (checkPlayServices()) {
             gcm = GoogleCloudMessaging.getInstance(this);
             regid = getRegistrationId(context);
-            if (regid.isEmpty())
+            Log.e("regid",regid);
+            //if (regid.isEmpty())
                 registerInBackground();
         } else
             Log.e("Errore: ", "No valid Google Play Service APK found.");
@@ -136,7 +137,7 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mLatLng, 18));
         mMap.addMarker(new MarkerOptions()
                 .position(mLatLng)
-                .title("Hello world!").icon(BitmapDescriptorFactory.fromResource(R.drawable.nexus)));
+                .title("Hello world!").icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_launcher)));
 
     }
 
@@ -215,6 +216,7 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
                     String msg = "";
 
                     try {
+                        mLocationClient.disconnect();
                         mLocationClient.connect();
                         Bundle data = new Bundle();
                         data.putString("my_message", "Hello World");
@@ -266,6 +268,7 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
                     }
                     regid = gcm.register(SENDER_ID);
                     msg = "Device registered, registration ID=" + regid;
+                    Log.e("prova:",msg);
 
                     // You should send the registration ID to your server over HTTP,
                     // so it can use GCM/HTTP or CCS to send messages to your app.
@@ -281,6 +284,7 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
                     storeRegistrationId(context, regid);
                 } catch (IOException ex) {
                     msg = "Error :" + ex.getMessage();
+                    Log.e("MainActivity", msg);
                     // If there is an error, don't just keep trying to register.
                     // Require the user to click a button again, or perform
                     // exponential back-off.
