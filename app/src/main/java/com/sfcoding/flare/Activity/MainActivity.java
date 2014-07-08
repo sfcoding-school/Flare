@@ -35,8 +35,15 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+
 import com.sfcoding.flare.Activity.ProfileActivity;
+import com.sfcoding.flare.Data.Group;
+import com.sfcoding.flare.Data.Person;
 import com.sfcoding.flare.R;
+import com.sfcoding.flare.Support.JsonIO;
+
+import org.json.JSONArray;
+import org.json.JSONException;
 
 import java.io.IOException;
 import java.security.MessageDigest;
@@ -77,49 +84,59 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        context = getApplicationContext();
+        //test for jsonio
+        Person io= new Person("15165","andrea",null,null,null);
+        Group.addFriend(io);
+        try {
+            JsonIO.saveFriends(Group.Friends,getApplicationContext(),"amici");
+            JSONArray jsonArray=JsonIO.fileToJson("amici",getApplicationContext());
+            Log.e("MainActivity", jsonArray.getJSONObject(0).getString("name"));
 
-
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         mMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
         mMap.setMyLocationEnabled(true);
         mLocationClient = new LocationClient(this, this, this);
         mLocationClient.connect();
         mDisplay = (TextView) findViewById(R.id.display);
-        context = getApplicationContext();
+
 
         if (checkPlayServices()) {
             gcm = GoogleCloudMessaging.getInstance(this);
             regid = getRegistrationId(context);
-            Log.e("regid",regid);
+            Log.e("regid", regid);
             //if (regid.isEmpty())
-                registerInBackground();
+            registerInBackground();
         } else
             Log.e("Errore: ", "No valid Google Play Service APK found.");
 
 
         // start Facebook Login
-           Session.openActiveSession(this, true, new Session.StatusCallback() {
+        Session.openActiveSession(this, true, new Session.StatusCallback() {
 
-                // callback when session changes state
-                @Override
-                public void call(Session session, SessionState state, Exception exception) {
-                    if (session.isOpened()) {
-                        // make request to the /me API
-                        Request.newMeRequest(session, new Request.GraphUserCallback() {
+            // callback when session changes state
+            @Override
+            public void call(Session session, SessionState state, Exception exception) {
+                if (session.isOpened()) {
+                    // make request to the /me API
+                    Request.newMeRequest(session, new Request.GraphUserCallback() {
 
-                            // callback after Graph API response with user object
-                            @Override
-                            public void onCompleted(GraphUser user, Response response) {
-                                if (user != null) {
-                                    TextView welcome = (TextView) findViewById(R.id.display);
-                                    welcome.setText("Hello " + user.getId() + "!");
-                                }
+                        // callback after Graph API response with user object
+                        @Override
+                        public void onCompleted(GraphUser user, Response response) {
+                            if (user != null) {
+                                TextView welcome = (TextView) findViewById(R.id.display);
+                                welcome.setText("Hello " + user.getId() + "!");
                             }
-                        }).executeAsync();
-                    }
+                        }
+                    }).executeAsync();
                 }
-            });
-            Intent intent = new Intent(this, ProfileActivity.class);
-            startService(intent);
+            }
+        });
+        Intent intent = new Intent(this, ProfileActivity.class);
+        startService(intent);
 
     }
 
@@ -268,7 +285,7 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
                     }
                     regid = gcm.register(SENDER_ID);
                     msg = "Device registered, registration ID=" + regid;
-                    Log.e("prova:",msg);
+                    Log.e("prova:", msg);
 
                     // You should send the registration ID to your server over HTTP,
                     // so it can use GCM/HTTP or CCS to send messages to your app.
