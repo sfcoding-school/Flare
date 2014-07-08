@@ -24,7 +24,7 @@ public class Group {
         Friends.add(friend);
     }
 
-    public static void removeFriend(int i) {
+    public static void rmFriend(int i) {
         Friends.remove(i);
     }
 

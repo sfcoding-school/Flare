@@ -35,7 +35,7 @@ public class JsonIO {
     public static JSONArray fromFriendsToJson(ArrayList<Person> friends) throws JSONException {
         JSONArray array = new JSONArray();
         int n = friends.size();
-        Log.e("num", Integer.toString(n));
+        ;
         for (int i = 0; i < n; i++) {
             Person person = friends.get(i);
             JSONObject jPerson = new JSONObject();
@@ -45,7 +45,6 @@ public class JsonIO {
             jPerson.put("lastLng", person.lastLng);
             array.put(jPerson);
         }
-        Log.e("jsonObj", array.getJSONObject(0).getString("name"));
         return array;
     }
 
@@ -76,7 +75,7 @@ public class JsonIO {
                 sb.append(line);
             }
             fis.close();
-            JSONArray res= new JSONArray(sb.toString());
+            JSONArray res = new JSONArray(sb.toString());
             return new JSONArray(sb.toString());
 
         } catch (IOException e) {
@@ -87,19 +86,18 @@ public class JsonIO {
         return null;
     }
 
-    public static ArrayList<Person> loadFriends(String fileName, Context context) throws JSONException {
-        JSONArray jsonArray=fileToJson(fileName,context);
+    public static void loadFriends(String fileName, Context context) throws JSONException {
+        Group.removeAll();
+        JSONArray jsonArray = fileToJson(fileName, context);
         JSONObject object;
-        ArrayList<Person> arrayList= new ArrayList<Person>();
-        for (int i=0;i<jsonArray.length();i++){
-            object=jsonArray.getJSONObject(i);
-            Person person=new Person();
-            person.name=object.getString("name");
-            person.id=object.getString("ID");
+        for (int i = 0; i < jsonArray.length(); i++) {
+            object = jsonArray.getJSONObject(i);
+            Person person = new Person();
+            person.name = object.getString("name");
+            person.id = object.getString("ID");
             person.lastLat=object.getDouble("lastLat");
             person.lastLng=object.getDouble("lastLng");
-            arrayList.add(person);
+            Group.addFriend(person);
         }
-        return arrayList;
     }
 }

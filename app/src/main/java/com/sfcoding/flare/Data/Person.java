@@ -12,8 +12,8 @@ public class Person {
     public int numParam;
     public String id;
     public String name;
-    public Double lastLat;
-    public Double lastLng;
+    public Double lastLat= Double.valueOf(91);
+    public Double lastLng= Double.valueOf(181);
     public Bitmap photo;
 
     public Person(){
@@ -23,8 +23,8 @@ public class Person {
         this.id = id;
         this.name = name;
         this.photo = photo;
-        this.lastLat = null;
-        this.lastLng=null;
+        this.lastLat = lastLat;
+        this.lastLng=lastLng;
         numParam=5;
     }
 

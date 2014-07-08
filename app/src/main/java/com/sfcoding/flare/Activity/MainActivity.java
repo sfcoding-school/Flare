@@ -42,12 +42,14 @@ import com.sfcoding.flare.Data.Person;
 import com.sfcoding.flare.R;
 import com.sfcoding.flare.Support.JsonIO;
 
+
 import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
@@ -85,30 +87,19 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         context = getApplicationContext();
-        //test for jsonio
-        Person io= new Person("15165","andrea",null,null,null);
-        Group.addFriend(io);
-        try {
-            JsonIO.saveFriends(Group.Friends,getApplicationContext(),"amici");
-            JSONArray jsonArray=JsonIO.fileToJson("amici",getApplicationContext());
-            Log.e("MainActivity", jsonArray.getJSONObject(0).getString("name"));
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
         mMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
         mMap.setMyLocationEnabled(true);
         mLocationClient = new LocationClient(this, this, this);
         mLocationClient.connect();
         mDisplay = (TextView) findViewById(R.id.display);
 
-
+        //GCM
         if (checkPlayServices()) {
             gcm = GoogleCloudMessaging.getInstance(this);
             regid = getRegistrationId(context);
             Log.e("regid", regid);
-            //if (regid.isEmpty())
-            registerInBackground();
+            if (regid.isEmpty())
+                registerInBackground();
         } else
             Log.e("Errore: ", "No valid Google Play Service APK found.");
 
@@ -139,6 +130,10 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
         startService(intent);
 
     }
+
+
+
+    //LOCATION METHOD//
 
     /*
      * Called by Location Services when the request to connect the
