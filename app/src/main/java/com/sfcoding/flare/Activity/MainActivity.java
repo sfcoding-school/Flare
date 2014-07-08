@@ -120,6 +120,7 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
                             if (user != null) {
                                 TextView welcome = (TextView) findViewById(R.id.display);
                                 welcome.setText("Hello " + user.getId() + "!");
+
                             }
                         }
                     }).executeAsync();
@@ -130,10 +131,6 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
         startService(intent);
 
     }
-
-
-
-    //LOCATION METHOD//
 
     /*
      * Called by Location Services when the request to connect the
