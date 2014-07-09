@@ -92,8 +92,9 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
         mLocationClient = new LocationClient(this, this, this);
         mLocationClient.connect();
         mDisplay = (TextView) findViewById(R.id.display);
+
         //POSIZIONO I MARKER IN BASE ALLE ULTIME INFO
-        try {
+        /*try {
             JsonIO.loadFriends("friends",getApplicationContext());
         } catch (JSONException e) {
             e.printStackTrace();
@@ -105,7 +106,7 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
                         .position(fLatLng)
                         .title(person.getName()).icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_launcher)));
             }
-        }
+        }*/
         //GCM
         if (checkPlayServices()) {
             gcm = GoogleCloudMessaging.getInstance(this);
@@ -212,6 +213,12 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
     @Override
     protected void onStart() {
         super.onStart();
+        //Carico il json con gli amici scelti
+        /*try {
+            JsonIO.loadFriends("friends",getApplicationContext());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }*/
         // Connect the client.
 
     }

@@ -12,5 +12,7 @@
     <string name="error_dialog_title">Error</string>
     <string name="error_dialog_button_text">OK</string>
     <string name="title_activity_picker">PickerActivity</string>
+    <string name="no_connection">Connessione Assente</string>
+    <string name="errFB">Errore Facebook</string>
 
 </resources>

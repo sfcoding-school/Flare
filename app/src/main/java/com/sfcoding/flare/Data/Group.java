@@ -10,13 +10,13 @@ import com.sfcoding.flare.Data.Person;
 public class Group {
     public static ArrayList<Person> Friends = new ArrayList<Person>();
 
-    public static Person findFriend(String id){
-        for(int i=0;i<Friends.size();i++)
-            if(Friends.get(i).id==id) return Friends.get(i);
+    public static Person findFriend(String id) {
+        for (int i = 0; i < Friends.size(); i++)
+            if (Friends.get(i).id == id) return Friends.get(i);
         return null;
     }
 
-    public static Boolean rmFriend(String id){
+    public static Boolean rmFriend(String id) {
         return Friends.remove(findFriend(id));
     }
 
@@ -30,5 +30,12 @@ public class Group {
 
     public static void removeAll() {
         Friends.removeAll(Friends);
+    }
+
+    public static Boolean searchById(String id) {
+        for(Person person:Friends){
+            if (person.getId()==id) return true;
+        }
+        return  false;
     }
 }
