@@ -1,6 +1,7 @@
 package com.sfcoding.flare.Activity;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -28,8 +29,9 @@ public class SelectFriendsActivity extends Activity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
+        if (id == R.id.done) {
+            Intent intent=new Intent(this,MainActivity.class);
+            startActivity(intent);
         }
         return super.onOptionsItemSelected(item);
     }

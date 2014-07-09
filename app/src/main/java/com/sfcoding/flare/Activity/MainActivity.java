@@ -92,7 +92,20 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
         mLocationClient = new LocationClient(this, this, this);
         mLocationClient.connect();
         mDisplay = (TextView) findViewById(R.id.display);
-
+        //POSIZIONO I MARKER IN BASE ALLE ULTIME INFO
+        try {
+            JsonIO.loadFriends("friends",getApplicationContext());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        for(Person person : Group.Friends){
+            if(person.lastLat!=91){
+                LatLng fLatLng=new LatLng(person.getLastLat(),person.getLastLng());
+                mMap.addMarker(new MarkerOptions()
+                        .position(fLatLng)
+                        .title(person.getName()).icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_launcher)));
+            }
+        }
         //GCM
         if (checkPlayServices()) {
             gcm = GoogleCloudMessaging.getInstance(this);
@@ -409,7 +422,9 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_settings) {
-            return true;
+            Intent intent=new Intent(this, SelectFriendsActivity.class);
+            startActivity(intent);
+
         }
         return super.onOptionsItemSelected(item);
     }
