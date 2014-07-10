@@ -14,7 +14,7 @@
         android:focusableInTouchMode="false"
         android:text="CheckBox"
         android:layout_centerVertical="true"
-        android:layout_toRightOf="@+id/img_profilo"
+        android:layout_toRightOf="@+id/txt_friends_name"
         android:layout_marginLeft="25dp" />
 
     <ImageView
@@ -36,14 +36,5 @@
         android:textSize="20dp"
         android:visibility="gone" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="HA L'APP"
-        android:id="@+id/txt_installed"
-        android:layout_centerVertical="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
 
 </RelativeLayout>

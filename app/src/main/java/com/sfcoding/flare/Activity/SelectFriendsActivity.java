@@ -51,6 +51,7 @@ public class SelectFriendsActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_select_friends);
         listView = (ListView) findViewById(R.id.listFriends);
         initView();
     }
@@ -86,24 +87,6 @@ public class SelectFriendsActivity extends Activity {
 
             @Override
             public void onCompleted(Response response) {
-               /* GraphObject graphObject = response.getGraphObject();
-                if (graphObject != null) {
-                    JSONObject jsonObject = graphObject.getInnerJSONObject();
-                    try {
-                        JSONArray array = jsonObject.getJSONArray("data");
-                        for (int i = 0; i < array.length(); i++) {
-                            JSONObject object = (JSONObject) array.get(i);
-                            Log.e("id", "id = " + object.get("id"));
-                        }
-                    } catch (JSONException e) {
-
-                        e.printStackTrace();
-                    }
-                }
-                else Log.e("devi","morire");
-            }
-        });*/
-
                 friends = getResults(response);
                 friendsList = new ArrayList<Person>();
                 //GraphUser use = friends.get(1);
@@ -115,11 +98,11 @@ public class SelectFriendsActivity extends Activity {
                     Log.e("amico", friend.getName());
                     friendsList.add(friend);
                 }
-                //dataAdapter = new FriendsAdapter(SelectFriendsActivity.this, R.layout.friends_row, friendsList);
-                //listView.setAdapter(dataAdapter);
+                dataAdapter = new FriendsAdapter(SelectFriendsActivity.this, R.layout.friends_row, friendsList);
+                listView.setAdapter(dataAdapter);
             }
         });
-    friendsRequest.executeAsync();
+        friendsRequest.executeAsync();
     }
 
 

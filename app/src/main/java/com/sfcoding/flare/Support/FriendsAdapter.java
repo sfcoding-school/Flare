@@ -25,22 +25,17 @@ import java.util.List;
 public class FriendsAdapter extends ArrayAdapter<Person> {
     public ArrayList<Person> friendList;
     private Context context;
-    private TextView container_friends;
-    private static List<Person> finali = null;
 
-    public FriendsAdapter(Context context,int textViewResourceId, ArrayList<Person> friendList) {
-        super(context,textViewResourceId,friendList);
+    public FriendsAdapter(Context context, int textViewResourceId, ArrayList<Person> friendList) {
+        super(context, textViewResourceId, friendList);
         this.friendList = new ArrayList<Person>();
         this.context = context;
         this.friendList.addAll(friendList);
-        if (finali == null)
-            finali = new ArrayList<Person>();
     }
 
     private class ViewHolder {
         CheckBox name;
         ImageView foto_profilo;
-        TextView installed;
     }
 
     @Override
@@ -57,25 +52,21 @@ public class FriendsAdapter extends ArrayAdapter<Person> {
             holder = new ViewHolder();
             holder.name = (CheckBox) convertView.findViewById(R.id.checkBox1);
             holder.foto_profilo = (ImageView) convertView.findViewById(R.id.img_profilo);
-            holder.installed = (TextView) convertView.findViewById(R.id.txt_installed);
-
             convertView.setTag(holder);
-
             holder.name.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-                    CheckBox cb = (CheckBox) v;
-                    Person friends1 = (Person) cb.getTag();
+                                               public void onClick(View v) {
+                                                   CheckBox cb = (CheckBox) v;
+                                                   Person friends1 = (Person) cb.getTag();
 
-                    if (cb.isChecked()) {
-                        finali.add(friends1);
-                        Log.e("aggiunto",friends1.getName());
-                        }
-
-                     else {
-                        //elimina dagli amici se presente
-                        Log.e("eliminato",friends1.getName());
-                    }}}
-           );
+                                                   if (cb.isChecked()) {
+                                                       Log.e("aggiunto", friends1.getName());
+                                                   } else {
+                                                       //elimina dagli amici se presente
+                                                       Log.e("eliminato", friends1.getName());
+                                                   }
+                                               }
+                                           }
+            );
 
         } else {
             holder = (ViewHolder) convertView.getTag();
