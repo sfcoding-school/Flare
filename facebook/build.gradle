@@ -7,15 +7,11 @@ dependencies {
 
 android {
     compileSdkVersion 20
-    buildToolsVersion '20.0.0'
+    buildToolsVersion  '20.0.0'
 
     defaultConfig {
-        minSdkVersion 9
+         minSdkVersion 9
         targetSdkVersion 20
-    }
-
-    lintOptions {
-        abortOnError false
     }
 
     sourceSets {

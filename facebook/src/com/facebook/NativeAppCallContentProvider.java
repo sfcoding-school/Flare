@@ -41,7 +41,7 @@ import java.util.*;
  * <p>If an application wishes to attach images that are stored in-memory within the application, this content
  * provider must be listed in the application's AndroidManifest.xml, and it should be named according to the
  * pattern <code>"com.facebook.app.NativeAppCallContentProvider{FACEBOOK_APP_ID}"</code>. See the
- * {@link NativeAppCallContentProvider#getAttachmentUrl(String) getContentProviderName} method.</p>
+ * {@link com.facebook.NativeAppCallContentProvider#getAttachmentUrl(String) getContentProviderName} method.</p>
  */
 public class NativeAppCallContentProvider extends ContentProvider {
     private static final String TAG = NativeAppCallContentProvider.class.getName();
@@ -101,8 +101,8 @@ public class NativeAppCallContentProvider extends ContentProvider {
     }
 
     @Override
-    public android.os.ParcelFileDescriptor openFile(android.net.Uri uri, java.lang.String mode)
-            throws java.io.FileNotFoundException {
+    public android.os.ParcelFileDescriptor openFile(android.net.Uri uri, String mode)
+            throws FileNotFoundException {
 
         Pair<UUID, String> callIdAndAttachmentName = parseCallIdAndAttachmentName(uri);
         if (callIdAndAttachmentName == null) {

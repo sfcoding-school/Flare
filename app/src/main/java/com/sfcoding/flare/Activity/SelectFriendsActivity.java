@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
@@ -22,6 +23,7 @@ import android.widget.Toast;
 import com.facebook.Request;
 import com.facebook.Response;
 import com.facebook.Session;
+import com.facebook.android.Util;
 import com.facebook.model.GraphMultiResult;
 import com.facebook.model.GraphObject;
 import com.facebook.model.GraphObjectList;
@@ -29,6 +31,10 @@ import com.facebook.model.GraphUser;
 import com.sfcoding.flare.Data.Person;
 import com.sfcoding.flare.R;
 import com.sfcoding.flare.Support.FriendsAdapter;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,12 +47,14 @@ public class SelectFriendsActivity extends Activity {
     ArrayList<Person> friendsList;
     List<GraphUser> friends;
     FriendsAdapter dataAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         listView = (ListView) findViewById(R.id.listFriends);
         initView();
     }
+
     private void initView() {
         //setto networkInfo per controllo accesso a internet
         ConnectivityManager connMgr = (ConnectivityManager)
@@ -69,6 +77,7 @@ public class SelectFriendsActivity extends Activity {
             Toast.makeText(getApplicationContext(), getString(R.string.errFB), Toast.LENGTH_LONG).show();
         }
     }
+
     //Richiesta amici FB
     private void requestMyAppFacebookFriends(Session session) {
         Request friendsRequest = createRequest(session);
@@ -77,36 +86,51 @@ public class SelectFriendsActivity extends Activity {
 
             @Override
             public void onCompleted(Response response) {
+               /* GraphObject graphObject = response.getGraphObject();
+                if (graphObject != null) {
+                    JSONObject jsonObject = graphObject.getInnerJSONObject();
+                    try {
+                        JSONArray array = jsonObject.getJSONArray("data");
+                        for (int i = 0; i < array.length(); i++) {
+                            JSONObject object = (JSONObject) array.get(i);
+                            Log.e("id", "id = " + object.get("id"));
+                        }
+                    } catch (JSONException e) {
+
+                        e.printStackTrace();
+                    }
+                }
+                else Log.e("devi","morire");
+            }
+        });*/
+
                 friends = getResults(response);
                 friendsList = new ArrayList<Person>();
-                Log.e("stato","ci sto dentro un casino");
-                GraphUser use=friends.get(1);
-                Log.e("utente",use.getUsername());
+                //GraphUser use = friends.get(1);
+                //Log.e("utente", use.getUsername());
                 for (GraphUser user : friends) {
                     Person friend = new Person();
                     friend.setId(user.getId());
                     friend.setName(user.getName());
-                    Log.e("amico",friend.getName());
+                    Log.e("amico", friend.getName());
                     friendsList.add(friend);
                 }
                 //dataAdapter = new FriendsAdapter(SelectFriendsActivity.this, R.layout.friends_row, friendsList);
                 //listView.setAdapter(dataAdapter);
             }
         });
-        friendsRequest.executeAsync();
+    friendsRequest.executeAsync();
     }
 
-    private Request createRequest(Session session) {
-        Request request = Request.newGraphPathRequest(session, "me/friends", null);
 
+    private Request createRequest(Session session) {
+        Request request = Request.newGraphPathRequest(session, "/me/taggable_friends", null);
         Set<String> fields = new HashSet<String>();
         String[] requiredFields = new String[]{"id", "name"};
         fields.addAll(Arrays.asList(requiredFields));
-
         Bundle parameters = request.getParameters();
         parameters.putString("fields", TextUtils.join(",", fields));
         request.setParameters(parameters);
-
         return request;
     }
 
@@ -132,7 +156,7 @@ public class SelectFriendsActivity extends Activity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.done) {
-            Intent intent=new Intent(this,MainActivity.class);
+            Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
         }
         return super.onOptionsItemSelected(item);

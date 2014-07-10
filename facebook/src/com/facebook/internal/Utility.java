@@ -17,6 +17,8 @@
 package com.facebook.internal;
 
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -55,14 +57,9 @@ public final class Utility {
     private static final String URL_SCHEME = "https";
     private static final String SUPPORTS_ATTRIBUTION = "supports_attribution";
     private static final String SUPPORTS_IMPLICIT_SDK_LOGGING = "supports_implicit_sdk_logging";
-    private static final String NUX_CONTENT = "gdpv4_nux_content";
-    private static final String NUX_ENABLED = "gdpv4_nux_enabled";
-
     private static final String [] APP_SETTING_FIELDS = new String[] {
             SUPPORTS_ATTRIBUTION,
-            SUPPORTS_IMPLICIT_SDK_LOGGING,
-            NUX_CONTENT,
-            NUX_ENABLED
+            SUPPORTS_IMPLICIT_SDK_LOGGING
     };
     private static final String APPLICATION_FIELDS = "fields";
 
@@ -75,17 +72,10 @@ public final class Utility {
     public static class FetchedAppSettings {
         private boolean supportsAttribution;
         private boolean supportsImplicitLogging;
-        private String nuxContent;
-        private boolean nuxEnabled;
 
-        private FetchedAppSettings(boolean supportsAttribution,
-                                   boolean supportsImplicitLogging,
-                                   String nuxContent,
-                                   boolean nuxEnabled) {
+        private FetchedAppSettings(boolean supportsAttribution, boolean supportsImplicitLogging) {
             this.supportsAttribution = supportsAttribution;
             this.supportsImplicitLogging = supportsImplicitLogging;
-            this.nuxContent = nuxContent;
-            this.nuxEnabled = nuxEnabled;
         }
 
         public boolean supportsAttribution() {
@@ -94,14 +84,6 @@ public final class Utility {
 
         public boolean supportsImplicitLogging() {
             return supportsImplicitLogging;
-        }
-
-        public String getNuxContent() {
-            return nuxContent;
-        }
-
-        public boolean getNuxEnabled() {
-            return nuxEnabled;
         }
     }
 
@@ -146,30 +128,19 @@ public final class Utility {
         return hashWithAlgorithm(HASH_ALGORITHM_MD5, key);
     }
 
-    static String sha1hash(String key) {
+    private static String sha1hash(String key) {
         return hashWithAlgorithm(HASH_ALGORITHM_SHA1, key);
     }
 
-    static String sha1hash(byte[] bytes) {
-        return hashWithAlgorithm(HASH_ALGORITHM_SHA1, bytes);
-    }
-
     private static String hashWithAlgorithm(String algorithm, String key) {
-        return hashWithAlgorithm(algorithm, key.getBytes());
-    }
-
-    private static String hashWithAlgorithm(String algorithm, byte[] bytes) {
-        MessageDigest hash;
+        MessageDigest hash = null;
         try {
             hash = MessageDigest.getInstance(algorithm);
         } catch (NoSuchAlgorithmException e) {
             return null;
         }
-        return hashBytes(hash, bytes);
-    }
 
-    private static String hashBytes(MessageDigest hash, byte[] bytes) {
-        hash.update(bytes);
+        hash.update(key.getBytes());
         byte[] digest = hash.digest();
         StringBuilder builder = new StringBuilder();
         for (int b : digest) {
@@ -224,9 +195,17 @@ public final class Utility {
     public static String getMetadataApplicationId(Context context) {
         Validate.notNull(context, "context");
 
-        Settings.loadDefaultsFromMetadata(context);
+        try {
+            ApplicationInfo ai = context.getPackageManager().getApplicationInfo(
+                    context.getPackageName(), PackageManager.GET_META_DATA);
+            if (ai.metaData != null) {
+                return ai.metaData.getString(Session.APPLICATION_ID_PROPERTY);
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            // if we can't find it in the manifest, just return null
+        }
 
-        return Settings.getApplicationId();
+        return null;
     }
 
     static Map<String, Object> convertJSONObjectToHashMap(JSONObject jsonObject) {
@@ -382,10 +361,7 @@ public final class Utility {
         GraphObject supportResponse = request.executeAndWait().getGraphObject();
         FetchedAppSettings result = new FetchedAppSettings(
                 safeGetBooleanFromResponse(supportResponse, SUPPORTS_ATTRIBUTION),
-                safeGetBooleanFromResponse(supportResponse, SUPPORTS_IMPLICIT_SDK_LOGGING),
-                safeGetStringFromResponse(supportResponse, NUX_CONTENT),
-                safeGetBooleanFromResponse(supportResponse, NUX_ENABLED)
-                );
+                safeGetBooleanFromResponse(supportResponse, SUPPORTS_IMPLICIT_SDK_LOGGING));
 
         fetchedAppSettings.put(applicationId, result);
 
@@ -401,17 +377,6 @@ public final class Utility {
             result = false;
         }
         return (Boolean) result;
-    }
-
-    private static String safeGetStringFromResponse(GraphObject response, String propertyName) {
-        Object result = "";
-        if (response != null) {
-            result = response.getProperty(propertyName);
-        }
-        if (!(result instanceof String)) {
-            result = "";
-        }
-        return (String) result;
     }
 
     public static void clearCaches(Context context) {
@@ -458,11 +423,11 @@ public final class Utility {
     public static void setAppEventAttributionParameters(GraphObject params,
             AttributionIdentifiers attributionIdentifiers, String hashedDeviceAndAppId, boolean limitEventUsage) {
         // Send attributionID if it exists, otherwise send a hashed device+appid specific value as the advertiser_id.
-        if (attributionIdentifiers != null && attributionIdentifiers.getAttributionId() != null) {
+        if (attributionIdentifiers.getAttributionId() != null) {
             params.setProperty("attribution", attributionIdentifiers.getAttributionId());
         }
 
-        if (attributionIdentifiers != null && attributionIdentifiers.getAndroidAdvertiserId() != null) {
+        if (attributionIdentifiers.getAndroidAdvertiserId() != null) {
             params.setProperty("advertiser_id", attributionIdentifiers.getAndroidAdvertiserId());
             params.setProperty("advertiser_tracking_enabled", !attributionIdentifiers.isTrackingLimited());
         } else if (hashedDeviceAndAppId != null) {
