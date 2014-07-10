@@ -87,6 +87,7 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         context = getApplicationContext();
+        getKeyHash();
         mMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
         mMap.setMyLocationEnabled(true);
         mLocationClient = new LocationClient(this, this, this);
@@ -155,12 +156,12 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
     public void onConnected(Bundle dataBundle) {
         // Display the connection status
         Toast.makeText(this, "Connected", Toast.LENGTH_SHORT).show();
-        Location mLocation = new Location(mLocationClient.getLastLocation());
+        /*Location mLocation = new Location(mLocationClient.getLastLocation());
         mLatLng = new LatLng(mLocation.getLatitude(), mLocation.getLongitude());
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mLatLng, 18));
         mMap.addMarker(new MarkerOptions()
                 .position(mLatLng)
-                .title("Hello world!").icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_launcher)));
+                .title("Hello world!").icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_launcher)));*/
 
     }
 
@@ -347,8 +348,9 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
 
     //get hash key
     // Add code to print out the key hash
-       /* try {
-            PackageInfo info = getPackageManager().getPackageInfo("com.partymanager", PackageManager.GET_SIGNATURES);
+       public void getKeyHash(){
+        try {
+            PackageInfo info = getPackageManager().getPackageInfo("com.sfcoding.flare", PackageManager.GET_SIGNATURES);
             for (Signature signature : info.signatures) {
                 MessageDigest md = MessageDigest.getInstance("SHA");
                 md.update(signature.toByteArray());
@@ -361,7 +363,7 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
             //Toast.makeText(getApplicati
         } catch (NoSuchAlgorithmException e) {
             Log.e("ProfileActivity:", "NoSuchAlgorithmException" + e);
-        }*/
+        }}
 
 
     /**

@@ -23,6 +23,8 @@ import android.widget.Toast;
 import com.facebook.Request;
 import com.facebook.Response;
 import com.facebook.Session;
+import com.facebook.SessionState;
+import com.facebook.android.Facebook;
 import com.facebook.android.Util;
 import com.facebook.model.GraphMultiResult;
 import com.facebook.model.GraphObject;
@@ -36,6 +38,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -69,6 +72,7 @@ public class SelectFriendsActivity extends Activity {
             if (networkInfo != null && networkInfo.isConnected()) {
                 requestMyAppFacebookFriends(session);
 
+
             } else {
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(SelectFriendsActivity.this);
                 alertDialogBuilder.setCancelable(false);
@@ -80,7 +84,7 @@ public class SelectFriendsActivity extends Activity {
     }
 
     //Richiesta amici FB
-    private void requestMyAppFacebookFriends(Session session) {
+   private void requestMyAppFacebookFriends(Session session) {
         Request friendsRequest = createRequest(session);
 
         friendsRequest.setCallback(new Request.Callback() {
@@ -106,10 +110,38 @@ public class SelectFriendsActivity extends Activity {
     }
 
 
+
+
+    private void getFriends(){
+        Session activeSession = Session.getActiveSession();
+        if(activeSession.getState().isOpened()){
+            Request friendRequest = Request.newMyFriendsRequest(activeSession, new Request.GraphUserListCallback() {
+
+                @Override
+                public void onCompleted(List<GraphUser> users, Response response)
+                {
+                    if(response.getError() == null)
+                    {
+                        Log.e("dim",Integer.toString(users.size()));
+                        for (int i = 0; i < users.size(); i++) {
+                            Log.e("users", "users " + users.get(i).getId());
+                        }
+                    }
+
+                }
+            });
+            Bundle params = new Bundle();
+            params.putString("fields", "id,name,installed");
+            friendRequest.setParameters(params);
+            friendRequest.executeAsync();
+        }
+    }
+
+
     private Request createRequest(Session session) {
-        Request request = Request.newGraphPathRequest(session, "/me/taggable_friends", null);
+        Request request = Request.newGraphPathRequest(session, "/me/friends", null);
         Set<String> fields = new HashSet<String>();
-        String[] requiredFields = new String[]{"id", "name"};
+        String[] requiredFields = new String[]{"id", "name","installed"};
         fields.addAll(Arrays.asList(requiredFields));
         Bundle parameters = request.getParameters();
         parameters.putString("fields", TextUtils.join(",", fields));

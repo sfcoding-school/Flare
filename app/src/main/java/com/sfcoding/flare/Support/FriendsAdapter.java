@@ -1,11 +1,15 @@
 package com.sfcoding.flare.Support;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Adapter;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.ImageView;
@@ -16,6 +20,9 @@ import com.sfcoding.flare.Data.Group;
 import com.sfcoding.flare.R;
 import com.sfcoding.flare.Support.JsonIO;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +32,7 @@ import java.util.List;
 public class FriendsAdapter extends ArrayAdapter<Person> {
     public ArrayList<Person> friendList;
     private Context context;
+    private FriendsAdapter adapter;
 
     public FriendsAdapter(Context context, int textViewResourceId, ArrayList<Person> friendList) {
         super(context, textViewResourceId, friendList);
@@ -83,25 +91,51 @@ public class FriendsAdapter extends ArrayAdapter<Person> {
         //Gestione foto profilo nella listview
        /* holder.foto_profilo.setImageBitmap(null);
         holder.foto_profilo.setBackground(context.getResources().getDrawable(R.drawable.com_facebook_profile_default_icon));
-        if (friends1.photo != null) {
+        if (currentFriend.photo != null) {
             holder.foto_profilo.setBackground(null);
-            holder.foto_profilo.setImageBitmap(friends1.getFoto());
+            holder.foto_profilo.setImageBitmap(currentFriend.getPhoto());
         } else {
-            HelperFacebook.getFacebookProfilePicture(friends1, adapter, 0);
-        }
-
-        if (container_friends == null) {
-            for (int i = 0; i < DatiFriends.ITEMS.size(); i++) {
-                if (friends1.code.equals(DatiFriends.ITEMS.get(i).code)) {
-                    holder.name.setTextColor(Color.GRAY);
-                    holder.foto_profilo.setAlpha(100);
-                    holder.installed.setAlpha(100);
-                    holder.name.setEnabled(false);
-                }
-            }
+            getFacebookProfilePicture(currentFriend, adapter, 0);
         }*/
 
+
+
         return convertView;
+    }
+    public static void getFacebookProfilePicture(final Person friends, final Adapter adapter, final int chi) {
+        new AsyncTask<Void, Void, Bitmap>() {
+
+            @Override
+            protected Bitmap doInBackground(Void... args) {
+                Bitmap bitmap = friends.getPhoto();
+                if (bitmap == null) {
+                    URL imageURL;
+
+                    try {
+                        imageURL = new URL("https://graph.facebook.com/" + friends.getId() + "/picture?type=small");
+                        bitmap = BitmapFactory.decodeStream(imageURL.openConnection().getInputStream());
+                    } catch (MalformedURLException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+                return bitmap;
+            }
+
+            @Override
+            protected void onPostExecute(Bitmap bitmap) {
+                if (bitmap != null) {
+                    friends.setPhoto(bitmap);
+                    if (chi == 0) {
+                        ((FriendsAdapter) adapter).notifyDataSetChanged();
+                    } else {
+                        ((FriendsAdapter) adapter).notifyDataSetChanged();
+                    }
+                }
+            }
+        }.execute();
     }
 
     //Aggiungo gli amici scelti all'activity e alla lista "finali"
