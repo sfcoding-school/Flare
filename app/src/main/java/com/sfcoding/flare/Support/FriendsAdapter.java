@@ -56,13 +56,13 @@ public class FriendsAdapter extends ArrayAdapter<Person> {
             holder.name.setOnClickListener(new View.OnClickListener() {
                                                public void onClick(View v) {
                                                    CheckBox cb = (CheckBox) v;
-                                                   Person friends1 = (Person) cb.getTag();
+                                                   Person currentFriend = (Person) cb.getTag();
 
                                                    if (cb.isChecked()) {
-                                                       Log.e("aggiunto", friends1.getName());
+                                                       Log.e("aggiunto", currentFriend.getName());
                                                    } else {
                                                        //elimina dagli amici se presente
-                                                       Log.e("eliminato", friends1.getName());
+                                                       Log.e("eliminato", currentFriend.getName());
                                                    }
                                                }
                                            }
@@ -72,11 +72,13 @@ public class FriendsAdapter extends ArrayAdapter<Person> {
             holder = (ViewHolder) convertView.getTag();
         }
 
-        Person friends1 = friendList.get(position);
-        holder.name.setText(friends1.getName());
-        holder.name.setTextColor(Color.BLACK);
-        holder.name.setChecked(false);
-        holder.name.setTag(friends1);
+        Person currentFriend = friendList.get(position);
+        holder.name.setText(currentFriend.getName());
+        holder.name.setTextColor(Color.parseColor("#8b9dc3"));
+        //Se l amico è già stato selezionato in passato, metto la spunta
+        if (Group.searchById(currentFriend.getId())) holder.name.setChecked(true);
+        else holder.name.setChecked(false);
+        holder.name.setTag(currentFriend);
 
         //Gestione foto profilo nella listview
        /* holder.foto_profilo.setImageBitmap(null);

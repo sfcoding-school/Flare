@@ -14,5 +14,6 @@
     <string name="title_activity_picker">PickerActivity</string>
     <string name="no_connection">Connessione Assente</string>
     <string name="errFB">Errore Facebook</string>
+    <color name="lightGray">#EEEEEE</color>
 
 </resources>

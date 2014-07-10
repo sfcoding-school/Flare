@@ -95,7 +95,7 @@ public class SelectFriendsActivity extends Activity {
                     Person friend = new Person();
                     friend.setId(user.getId());
                     friend.setName(user.getName());
-                    Log.e("amico", friend.getName());
+                    Log.e("amico", friend.getId());
                     friendsList.add(friend);
                 }
                 dataAdapter = new FriendsAdapter(SelectFriendsActivity.this, R.layout.friends_row, friendsList);

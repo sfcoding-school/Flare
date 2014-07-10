@@ -92,7 +92,7 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
         mLocationClient = new LocationClient(this, this, this);
         mLocationClient.connect();
         mDisplay = (TextView) findViewById(R.id.display);
-
+        //Person prova=new Person("")
         //POSIZIONO I MARKER IN BASE ALLE ULTIME INFO
         /*try {
             JsonIO.loadFriends("friends",getApplicationContext());
