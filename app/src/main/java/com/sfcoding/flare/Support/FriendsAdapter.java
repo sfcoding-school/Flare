@@ -38,13 +38,13 @@ public class FriendsAdapter extends ArrayAdapter<Person> {
     private ArrayList<Person> chosen;
 
 
-    public FriendsAdapter(Context context, int textViewResourceId, ArrayList<Person> friendList,ArrayList<Person> newchosen,ArrayList<Person> chosen) {
+    public FriendsAdapter(Context context, int textViewResourceId, ArrayList<Person> friendList, ArrayList<Person> newchosen, ArrayList<Person> chosen) {
         super(context, textViewResourceId, friendList);
         this.friendList = new ArrayList<Person>();
         this.context = context;
         this.friendList.addAll(friendList);
-        this.newchosen=newchosen;
-        this.chosen=chosen;
+        this.newchosen = newchosen;
+        this.chosen = chosen;
     }
 
     private class ViewHolder {
@@ -75,11 +75,13 @@ public class FriendsAdapter extends ArrayAdapter<Person> {
                                                        Log.e("aggiunto", currentFriend.getId());
                                                        currentFriend.setLastLat(0.0);
                                                        currentFriend.setLastLng(0.0);
-                                                       chosen.add(currentFriend);
+                                                       Group.addFriend(currentFriend);
                                                    } else {
                                                        //elimina dagli amici se presente
+                                                       if (!Group.rmFriend(currentFriend.getId()))
+                                                           Group.rmFriend(currentFriend.getId());
                                                        Log.e("eliminato", currentFriend.getName());
-                                                       chosen.remove(currentFriend);
+
                                                    }
                                                }
                                            }
@@ -93,7 +95,7 @@ public class FriendsAdapter extends ArrayAdapter<Person> {
         holder.name.setText(currentFriend.getName());
         holder.name.setTextColor(Color.parseColor("#8b9dc3"));
         //Se l amico è già stato selezionato in passato, metto la spunta
-        if (Group.searchById(currentFriend.getId())!=null) holder.name.setChecked(true);
+        if (Group.searchById(currentFriend.getId()) != null) holder.name.setChecked(true);
         else holder.name.setChecked(false);
         holder.name.setTag(currentFriend);
 
@@ -108,9 +110,9 @@ public class FriendsAdapter extends ArrayAdapter<Person> {
         }*/
 
 
-
         return convertView;
     }
+
     public static void getFacebookProfilePicture(final Person friends, final Adapter adapter, final int chi) {
         new AsyncTask<Void, Void, Bitmap>() {
 

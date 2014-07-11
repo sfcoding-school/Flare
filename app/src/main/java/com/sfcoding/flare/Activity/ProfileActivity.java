@@ -49,7 +49,7 @@ public class ProfileActivity extends Activity {
             }
         });
         // set permission list, Don't foeget to add email
-        authButton.setReadPermissions(Arrays.asList("basic_info","email"));
+        authButton.setReadPermissions(Arrays.asList("public_profile","email","user_friends"));
         // session state call back event
         authButton.setSessionStatusCallback(new Session.StatusCallback() {
 

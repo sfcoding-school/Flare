@@ -166,8 +166,7 @@ public class SelectFriendsActivity extends Activity {
         int id = item.getItemId();
         if (id == R.id.done) {
             try {
-                JsonIO.saveFriends(newchosen,getApplicationContext(),"friends");
-                Log.e("nchosen",Integer.toString(newchosen.size()));
+                JsonIO.saveFriends(Group.Friends,getApplicationContext(),"friends");
                 JsonIO.loadFriends("friends",getApplicationContext());
                 //Log.e("nuovo", Group.Friends.get(0).getId());
 

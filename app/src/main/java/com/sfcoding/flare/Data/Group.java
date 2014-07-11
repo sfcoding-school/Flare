@@ -12,7 +12,7 @@ public class Group {
 
     public static Person findFriend(String id) {
         for (int i = 0; i < Friends.size(); i++)
-            if (Friends.get(i).id == id) return Friends.get(i);
+            if (Friends.get(i).getId().equals(id)) return Friends.get(i);
         return null;
     }
 
@@ -34,8 +34,9 @@ public class Group {
 
     public static Person searchById(String id) {
         for(Person person:Friends){
-            if (person.getId()==id) return person;
+            if (person.getId().equals(id)) return person;
         }
         return  null;
     }
+
 }
