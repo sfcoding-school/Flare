@@ -53,7 +53,7 @@ public class SelectFriendsActivity extends Activity {
     ArrayList<Person> friendsList;
     List<GraphUser> friends;
     FriendsAdapter dataAdapter;
-    ArrayList<Person> chosen=new ArrayList<Person>();
+    ArrayList<Person> newchosen=new ArrayList<Person>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,7 +106,7 @@ public class SelectFriendsActivity extends Activity {
                     Log.e("amico", friend.getId());
                     friendsList.add(friend);
                 }
-                dataAdapter = new FriendsAdapter(SelectFriendsActivity.this, R.layout.friends_row, friendsList,chosen);
+                dataAdapter = new FriendsAdapter(SelectFriendsActivity.this, R.layout.friends_row, friendsList,newchosen,Group.Friends);
                 listView.setAdapter(dataAdapter);
             }
         });
@@ -166,10 +166,10 @@ public class SelectFriendsActivity extends Activity {
         int id = item.getItemId();
         if (id == R.id.done) {
             try {
-                JsonIO.saveFriends(chosen,getApplicationContext(),"friends");
-                Log.e("nchosen",Integer.toString(chosen.size()));
+                JsonIO.saveFriends(newchosen,getApplicationContext(),"friends");
+                Log.e("nchosen",Integer.toString(newchosen.size()));
                 JsonIO.loadFriends("friends",getApplicationContext());
-                Log.e("nuovo", Group.Friends.get(0).getId());
+                //Log.e("nuovo", Group.Friends.get(0).getId());
 
             } catch (JSONException e) {
                 e.printStackTrace();

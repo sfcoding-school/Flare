@@ -34,13 +34,16 @@ public class FriendsAdapter extends ArrayAdapter<Person> {
     public ArrayList<Person> friendList;
     private Context context;
     private FriendsAdapter adapter;
+    private ArrayList<Person> newchosen;
     private ArrayList<Person> chosen;
 
-    public FriendsAdapter(Context context, int textViewResourceId, ArrayList<Person> friendList,ArrayList<Person> chosen) {
+
+    public FriendsAdapter(Context context, int textViewResourceId, ArrayList<Person> friendList,ArrayList<Person> newchosen,ArrayList<Person> chosen) {
         super(context, textViewResourceId, friendList);
         this.friendList = new ArrayList<Person>();
         this.context = context;
         this.friendList.addAll(friendList);
+        this.newchosen=newchosen;
         this.chosen=chosen;
     }
 
@@ -68,11 +71,10 @@ public class FriendsAdapter extends ArrayAdapter<Person> {
                                                public void onClick(View v) {
                                                    CheckBox cb = (CheckBox) v;
                                                    Person currentFriend = (Person) cb.getTag();
-
                                                    if (cb.isChecked()) {
                                                        Log.e("aggiunto", currentFriend.getId());
-                                                       currentFriend.setLastLat(-60.0);
-                                                       currentFriend.setLastLng(60.0);
+                                                       currentFriend.setLastLat(0.0);
+                                                       currentFriend.setLastLng(0.0);
                                                        chosen.add(currentFriend);
                                                    } else {
                                                        //elimina dagli amici se presente

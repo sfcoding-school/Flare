@@ -12,6 +12,7 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
@@ -79,7 +80,6 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
     LocationClient mLocationClient;
     private GoogleMap mMap;
     LatLng mLatLng;
-
     String regid;
 
     @Override
@@ -105,9 +105,16 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
         } else
             Log.e("Errore: ", "No valid Google Play Service APK found.");
 
+        Session session = getSession(this);
+
+        if (!session.isOpened()) {
+            Intent newact = new Intent(this, ProfileActivity.class);
+            startActivity(newact);
+        }
+
 
         // start Facebook Login
-        Session.openActiveSession(this, true, new Session.StatusCallback() {
+        /*Session.openActiveSession(this, true, new Session.StatusCallback() {
             // callback when session changes state
             @Override
             public void call(Session session, SessionState state, Exception exception) {
@@ -120,16 +127,12 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
                             if (user != null) {
                                 TextView welcome = (TextView) findViewById(R.id.display);
                                 welcome.setText("Hello " + user.getId() + "!");
-
                             }
                         }
                     }).executeAsync();
                 }
             }
-        });
-        Intent intent = new Intent(this, ProfileActivity.class);
-        startService(intent);
-
+        });*/
     }
 
     /*
@@ -233,7 +236,44 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
         mLocationClient.disconnect();
         super.onStop();
     }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+        if (id == R.id.select_friends) {
+            Intent intent=new Intent(this, SelectFriendsActivity.class);
+            startActivity(intent);
+
+        }
+        if (id==R.id.fb){
+            Intent intent=new Intent(this, ProfileActivity.class);
+            startActivity(intent);
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Session.getActiveSession().onActivityResult(this, requestCode, resultCode, data);
+    }
+
+    public static String getToken() {
+        Activity activity=new MainActivity();
+        Session session = getSession(activity);
+        String token = session.getAccessToken();
+        Log.e("TOKEN - getToken", token);
+        return token;
+    }
 
     public void onClick(final View view) {
         // Perform action on click
@@ -417,32 +457,7 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            Intent intent=new Intent(this, SelectFriendsActivity.class);
-            startActivity(intent);
-
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        Session.getActiveSession().onActivityResult(this, requestCode, resultCode, data);
-    }
 
     private boolean checkPlayServices() {
         int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
@@ -457,6 +472,18 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
             return false;
         }
         return true;
+    }
+
+    public static Session getSession(Activity activity) {
+        Session session = Session.getActiveSession();
+        if (session == null) {
+            session = new Session(activity);
+            Session.setActiveSession(session);
+            if (session.getState().equals(SessionState.CREATED_TOKEN_LOADED)) {
+                session.openForRead(new Session.OpenRequest(activity));
+            }
+        }
+        return session;
     }
 
 }
