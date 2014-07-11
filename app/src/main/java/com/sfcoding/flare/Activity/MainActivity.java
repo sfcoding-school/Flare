@@ -93,21 +93,21 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
         mLocationClient = new LocationClient(this, this, this);
         mLocationClient.connect();
         mDisplay = (TextView) findViewById(R.id.display);
-        //Person prova=new Person("")
+        Person prova=new Person("500","userprova",50.0,50.0,null);
+        Group.addFriend(prova);
+        try {
+            JsonIO.saveFriends(Group.Friends,getApplicationContext(),"friends");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
         //POSIZIONO I MARKER IN BASE ALLE ULTIME INFO
-        /*try {
+        try {
             JsonIO.loadFriends("friends",getApplicationContext());
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        for(Person person : Group.Friends){
-            if(person.lastLat!=91){
-                LatLng fLatLng=new LatLng(person.getLastLat(),person.getLastLng());
-                mMap.addMarker(new MarkerOptions()
-                        .position(fLatLng)
-                        .title(person.getName()).icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_launcher)));
-            }
-        }*/
+
         //GCM
         if (checkPlayServices()) {
             gcm = GoogleCloudMessaging.getInstance(this);
@@ -121,14 +121,12 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
 
         // start Facebook Login
         Session.openActiveSession(this, true, new Session.StatusCallback() {
-
             // callback when session changes state
             @Override
             public void call(Session session, SessionState state, Exception exception) {
                 if (session.isOpened()) {
                     // make request to the /me API
                     Request.newMeRequest(session, new Request.GraphUserCallback() {
-
                         // callback after Graph API response with user object
                         @Override
                         public void onCompleted(GraphUser user, Response response) {
@@ -156,12 +154,12 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
     public void onConnected(Bundle dataBundle) {
         // Display the connection status
         Toast.makeText(this, "Connected", Toast.LENGTH_SHORT).show();
-        /*Location mLocation = new Location(mLocationClient.getLastLocation());
+        Location mLocation = new Location(mLocationClient.getLastLocation());
         mLatLng = new LatLng(mLocation.getLatitude(), mLocation.getLongitude());
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mLatLng, 18));
         mMap.addMarker(new MarkerOptions()
                 .position(mLatLng)
-                .title("Hello world!").icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_launcher)));*/
+                .title("Hello world!").icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_launcher)));
 
     }
 
@@ -214,13 +212,14 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
     @Override
     protected void onStart() {
         super.onStart();
-        //Carico il json con gli amici scelti
-        /*try {
-            JsonIO.loadFriends("friends",getApplicationContext());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }*/
-        // Connect the client.
+        for(Person person : Group.Friends){
+            if(person.lastLat!=91){
+                LatLng fLatLng=new LatLng(person.getLastLat(),person.getLastLng());
+                mMap.addMarker(new MarkerOptions()
+                        .position(fLatLng)
+                        .title(Double.toString(person.getLastLat())).icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_launcher)));
+            }
+        }
 
     }
 

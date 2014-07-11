@@ -15,6 +15,7 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.sfcoding.flare.Activity.SelectFriendsActivity;
 import com.sfcoding.flare.Data.Person;
 import com.sfcoding.flare.Data.Group;
 import com.sfcoding.flare.R;
@@ -33,12 +34,14 @@ public class FriendsAdapter extends ArrayAdapter<Person> {
     public ArrayList<Person> friendList;
     private Context context;
     private FriendsAdapter adapter;
+    private ArrayList<Person> chosen;
 
-    public FriendsAdapter(Context context, int textViewResourceId, ArrayList<Person> friendList) {
+    public FriendsAdapter(Context context, int textViewResourceId, ArrayList<Person> friendList,ArrayList<Person> chosen) {
         super(context, textViewResourceId, friendList);
         this.friendList = new ArrayList<Person>();
         this.context = context;
         this.friendList.addAll(friendList);
+        this.chosen=chosen;
     }
 
     private class ViewHolder {
@@ -67,10 +70,14 @@ public class FriendsAdapter extends ArrayAdapter<Person> {
                                                    Person currentFriend = (Person) cb.getTag();
 
                                                    if (cb.isChecked()) {
-                                                       Log.e("aggiunto", currentFriend.getName());
+                                                       Log.e("aggiunto", currentFriend.getId());
+                                                       currentFriend.setLastLat(-60.0);
+                                                       currentFriend.setLastLng(60.0);
+                                                       chosen.add(currentFriend);
                                                    } else {
                                                        //elimina dagli amici se presente
                                                        Log.e("eliminato", currentFriend.getName());
+                                                       chosen.remove(currentFriend);
                                                    }
                                                }
                                            }
@@ -84,7 +91,7 @@ public class FriendsAdapter extends ArrayAdapter<Person> {
         holder.name.setText(currentFriend.getName());
         holder.name.setTextColor(Color.parseColor("#8b9dc3"));
         //Se l amico è già stato selezionato in passato, metto la spunta
-        if (Group.searchById(currentFriend.getId())) holder.name.setChecked(true);
+        if (Group.searchById(currentFriend.getId())!=null) holder.name.setChecked(true);
         else holder.name.setChecked(false);
         holder.name.setTag(currentFriend);
 

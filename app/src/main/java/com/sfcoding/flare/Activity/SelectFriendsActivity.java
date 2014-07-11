@@ -20,6 +20,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.facebook.HttpMethod;
 import com.facebook.Request;
 import com.facebook.Response;
 import com.facebook.Session;
@@ -33,6 +34,7 @@ import com.facebook.model.GraphUser;
 import com.sfcoding.flare.Data.Person;
 import com.sfcoding.flare.R;
 import com.sfcoding.flare.Support.FriendsAdapter;
+import com.sfcoding.flare.Support.JsonIO;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -50,6 +52,7 @@ public class SelectFriendsActivity extends Activity {
     ArrayList<Person> friendsList;
     List<GraphUser> friends;
     FriendsAdapter dataAdapter;
+    ArrayList<Person> chosen=new ArrayList<Person>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,7 +88,7 @@ public class SelectFriendsActivity extends Activity {
 
     //Richiesta amici FB
    private void requestMyAppFacebookFriends(Session session) {
-        Request friendsRequest = createRequest(session);
+       /* Request friendsRequest = createRequest(session);
 
         friendsRequest.setCallback(new Request.Callback() {
 
@@ -102,39 +105,30 @@ public class SelectFriendsActivity extends Activity {
                     Log.e("amico", friend.getId());
                     friendsList.add(friend);
                 }
-                dataAdapter = new FriendsAdapter(SelectFriendsActivity.this, R.layout.friends_row, friendsList);
+                dataAdapter = new FriendsAdapter(SelectFriendsActivity.this, R.layout.friends_row, friendsList,chosen);
                 listView.setAdapter(dataAdapter);
             }
-        });
-        friendsRequest.executeAsync();
-    }
-
-
-
-
-    private void getFriends(){
-        Session activeSession = Session.getActiveSession();
-        if(activeSession.getState().isOpened()){
-            Request friendRequest = Request.newMyFriendsRequest(activeSession, new Request.GraphUserListCallback() {
-
-                @Override
-                public void onCompleted(List<GraphUser> users, Response response)
-                {
-                    if(response.getError() == null)
-                    {
-                        Log.e("dim",Integer.toString(users.size()));
-                        for (int i = 0; i < users.size(); i++) {
-                            Log.e("users", "users " + users.get(i).getId());
-                        }
-                    }
-
-                }
-            });
-            Bundle params = new Bundle();
-            params.putString("fields", "id,name,installed");
-            friendRequest.setParameters(params);
-            friendRequest.executeAsync();
-        }
+        });*/
+       new Request(
+               session,
+               "/me/friends",
+               null,
+               HttpMethod.GET,
+               new Request.Callback() {
+                   public void onCompleted(Response response) {
+            /* handle the result */
+                       friends = getResults(response);
+                       for (GraphUser user : friends) {
+                           Person friend = new Person();
+                           friend.setId(user.getId());
+                           friend.setName(user.getName());
+                           Log.e("amico", friend.getId());
+                           //friendsList.add(friend);
+                       }
+                   }
+               }
+       ).executeAsync();
+        //friendsRequest.executeAsync();
     }
 
 
@@ -171,6 +165,13 @@ public class SelectFriendsActivity extends Activity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.done) {
+            try {
+                JsonIO.saveFriends(chosen,getApplicationContext(),"friends");
+                Log.e("nchosen",Integer.toString(chosen.size()));
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
             Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
         }

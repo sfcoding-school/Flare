@@ -35,7 +35,6 @@ public class JsonIO {
     public static JSONArray fromFriendsToJson(ArrayList<Person> friends) throws JSONException {
         JSONArray array = new JSONArray();
         int n = friends.size();
-        ;
         for (int i = 0; i < n; i++) {
             Person person = friends.get(i);
             JSONObject jPerson = new JSONObject();
@@ -86,7 +85,7 @@ public class JsonIO {
         return null;
     }
 
-    public static void loadFriends(String fileName, Context context) throws JSONException {
+    public static void  loadFriends(String fileName, Context context) throws JSONException {
         Group.removeAll();
         JSONArray jsonArray = fileToJson(fileName, context);
         JSONObject object;

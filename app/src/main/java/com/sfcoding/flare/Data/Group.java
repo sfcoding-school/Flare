@@ -32,10 +32,10 @@ public class Group {
         Friends.removeAll(Friends);
     }
 
-    public static Boolean searchById(String id) {
+    public static Person searchById(String id) {
         for(Person person:Friends){
-            if (person.getId()==id) return true;
+            if (person.getId()==id) return person;
         }
-        return  false;
+        return  null;
     }
 }
