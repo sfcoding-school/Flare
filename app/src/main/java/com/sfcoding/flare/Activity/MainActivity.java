@@ -93,20 +93,7 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
         mLocationClient = new LocationClient(this, this, this);
         mLocationClient.connect();
         mDisplay = (TextView) findViewById(R.id.display);
-        Person prova=new Person("500","userprova",50.0,50.0,null);
-        Group.addFriend(prova);
-        try {
-            JsonIO.saveFriends(Group.Friends,getApplicationContext(),"friends");
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
 
-        //POSIZIONO I MARKER IN BASE ALLE ULTIME INFO
-        try {
-            JsonIO.loadFriends("friends",getApplicationContext());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
 
         //GCM
         if (checkPlayServices()) {
@@ -212,6 +199,20 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
     @Override
     protected void onStart() {
         super.onStart();
+        Person prova=new Person("500","userprova",50.0,50.0,null);
+        Group.addFriend(prova);
+        try {
+            JsonIO.saveFriends(Group.Friends,getApplicationContext(),"friends");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        //POSIZIONO I MARKER IN BASE ALLE ULTIME INFO
+        try {
+            JsonIO.loadFriends("friends",getApplicationContext());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         for(Person person : Group.Friends){
             if(person.lastLat!=91){
                 LatLng fLatLng=new LatLng(person.getLastLat(),person.getLastLng());

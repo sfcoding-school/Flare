@@ -31,6 +31,7 @@ import com.facebook.model.GraphMultiResult;
 import com.facebook.model.GraphObject;
 import com.facebook.model.GraphObjectList;
 import com.facebook.model.GraphUser;
+import com.sfcoding.flare.Data.Group;
 import com.sfcoding.flare.Data.Person;
 import com.sfcoding.flare.R;
 import com.sfcoding.flare.Support.FriendsAdapter;
@@ -88,7 +89,7 @@ public class SelectFriendsActivity extends Activity {
 
     //Richiesta amici FB
    private void requestMyAppFacebookFriends(Session session) {
-       /* Request friendsRequest = createRequest(session);
+        Request friendsRequest = createRequest(session);
 
         friendsRequest.setCallback(new Request.Callback() {
 
@@ -108,15 +109,14 @@ public class SelectFriendsActivity extends Activity {
                 dataAdapter = new FriendsAdapter(SelectFriendsActivity.this, R.layout.friends_row, friendsList,chosen);
                 listView.setAdapter(dataAdapter);
             }
-        });*/
-       new Request(
+        });
+       /*new Request(
                session,
                "/me/friends",
                null,
                HttpMethod.GET,
                new Request.Callback() {
                    public void onCompleted(Response response) {
-            /* handle the result */
                        friends = getResults(response);
                        for (GraphUser user : friends) {
                            Person friend = new Person();
@@ -127,8 +127,8 @@ public class SelectFriendsActivity extends Activity {
                        }
                    }
                }
-       ).executeAsync();
-        //friendsRequest.executeAsync();
+       ).executeAsync();*/
+        friendsRequest.executeAsync();
     }
 
 
@@ -168,6 +168,8 @@ public class SelectFriendsActivity extends Activity {
             try {
                 JsonIO.saveFriends(chosen,getApplicationContext(),"friends");
                 Log.e("nchosen",Integer.toString(chosen.size()));
+                JsonIO.loadFriends("friends",getApplicationContext());
+                Log.e("nuovo", Group.Friends.get(0).getId());
 
             } catch (JSONException e) {
                 e.printStackTrace();
