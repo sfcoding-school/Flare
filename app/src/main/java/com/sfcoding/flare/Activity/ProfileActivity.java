@@ -13,6 +13,7 @@ import android.view.MenuItem;
 
 import com.facebook.FacebookException;
 import com.facebook.Request;
+import com.facebook.RequestAsyncTask;
 import com.facebook.Response;
 import com.facebook.Session;
 import com.facebook.SessionState;
@@ -49,7 +50,7 @@ public class ProfileActivity extends Activity {
             }
         });
         // set permission list, Don't foeget to add email
-        authButton.setReadPermissions(Arrays.asList("public_profile","email","user_friends"));
+        authButton.setReadPermissions(Arrays.asList("basic_info","email"));
         // session state call back event
         authButton.setSessionStatusCallback(new Session.StatusCallback() {
 
@@ -58,17 +59,20 @@ public class ProfileActivity extends Activity {
 
                 if (session.isOpened()) {
                     Log.i(TAG,"Access Token"+ session.getAccessToken());
-                    Request.executeMeRequestAsync(session,
+                    RequestAsyncTask requestAsyncTask = Request.executeMeRequestAsync(session,
                             new Request.GraphUserCallback() {
                                 @Override
-                                public void onCompleted(GraphUser user,Response response) {
+                                public void onCompleted(GraphUser user, Response response) {
                                     if (user != null) {
-                                        Log.i(TAG,"User ID "+ user.getId());
-                                        Log.i(TAG,"Email "+ user.asMap().get("email"));
+                                        Log.i(TAG, "User ID " + user.getId());
+                                        Log.i(TAG, "Email " + user.asMap().get("email"));
                                         lblEmail.setText(user.asMap().get("email").toString());
+                                        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                                        startActivity(intent);
                                     }
                                 }
-                            });
+                            }
+                    );
                 }
 
             }

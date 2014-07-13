@@ -42,6 +42,7 @@ import com.sfcoding.flare.Data.Group;
 import com.sfcoding.flare.Data.Person;
 import com.sfcoding.flare.R;
 import com.sfcoding.flare.Support.JsonIO;
+import com.sfcoding.flare.Support.FlareFunction;
 
 
 import org.json.JSONArray;
@@ -60,6 +61,8 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
     public static final String PROPERTY_REG_ID = "registration_id";
     private static final String PROPERTY_APP_VERSION = "appVersion";
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
+    private static String FB_ID;
+    public final String REG_ID = "reg_id";
     /**
      * Substitute you own sender ID here. This is the project number you got
      * from the API Console, as described in "Getting Started."
@@ -92,7 +95,7 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
         mMap.setMyLocationEnabled(true);
         mLocationClient = new LocationClient(this, this, this);
         mLocationClient.connect();
-        mDisplay = (TextView) findViewById(R.id.display);
+        //mDisplay = (TextView) findViewById(R.id.display);
 
 
         //GCM
@@ -104,13 +107,6 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
                 registerInBackground();
         } else
             Log.e("Errore: ", "No valid Google Play Service APK found.");
-
-        Session session = getSession(this);
-
-        if (!session.isOpened()) {
-            Intent newact = new Intent(this, ProfileActivity.class);
-            startActivity(newact);
-        }
 
 
         // start Facebook Login
@@ -202,29 +198,42 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
     @Override
     protected void onStart() {
         super.onStart();
-        Person prova=new Person("500","userprova",50.0,50.0,null);
+        Session session = getSession(this);
+        Boolean aBoolean = session.isOpened();
+        if (!session.isOpened()) {
+            Intent newact = new Intent(this, ProfileActivity.class);
+            startActivity(newact);
+        }
+
+        Person prova = new Person("500", "userprova", 50.0, 50.0, null);
         Group.addFriend(prova);
         try {
-            JsonIO.saveFriends(Group.Friends,getApplicationContext(),"friends");
+            JsonIO.saveFriends(Group.Friends, getApplicationContext(), "friends");
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        placeMarker();
 
         //POSIZIONO I MARKER IN BASE ALLE ULTIME INFO
+
+
+    }
+
+    //Apre il json con gli amici e le loro ultime posizioni e piazza i marker sulla mappa
+    public void placeMarker(){
         try {
-            JsonIO.loadFriends("friends",getApplicationContext());
+            JsonIO.loadFriends("friends", getApplicationContext());
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        for(Person person : Group.Friends){
-            if(person.lastLat!=91){
-                LatLng fLatLng=new LatLng(person.getLastLat(),person.getLastLng());
+        for (Person person : Group.Friends) {
+            if (person.lastLat != 91) {
+                LatLng fLatLng = new LatLng(person.getLastLat(), person.getLastLng());
                 mMap.addMarker(new MarkerOptions()
                         .position(fLatLng)
-                        .title(Double.toString(person.getLastLat())).icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_launcher)));
+                        .title(person.getName()).icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_launcher)));
             }
         }
-
     }
 
     /*
@@ -236,6 +245,7 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
         mLocationClient.disconnect();
         super.onStop();
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -250,12 +260,12 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.select_friends) {
-            Intent intent=new Intent(this, SelectFriendsActivity.class);
+            Intent intent = new Intent(this, SelectFriendsActivity.class);
             startActivity(intent);
 
         }
-        if (id==R.id.fb){
-            Intent intent=new Intent(this, ProfileActivity.class);
+        if (id == R.id.fb) {
+            Intent intent = new Intent(this, ProfileActivity.class);
             startActivity(intent);
         }
         return super.onOptionsItemSelected(item);
@@ -268,7 +278,7 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
     }
 
     public static String getToken() {
-        Activity activity=new MainActivity();
+        Activity activity = new MainActivity();
         Session session = getSession(activity);
         String token = session.getAccessToken();
         Log.e("TOKEN - getToken", token);
@@ -278,39 +288,42 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
     public void onClick(final View view) {
         // Perform action on click
         mDisplay.setText("");
-        if (view == findViewById(R.id.send)) {
+        if (view == findViewById(R.id.flare)) {
 
             new AsyncTask<Void, Void, String>() {
                 @Override
                 protected String doInBackground(Void... params) {
                     String msg = "";
 
-                    try {
-                        mLocationClient.disconnect();
-                        mLocationClient.connect();
-                        Bundle data = new Bundle();
-                        data.putString("my_message", "Hello World");
-                        data.putString("my_action",
-                                "com.google.android.gcm.demo.app.ECHO_NOW");
-                        String id = Integer.toString(msgId.incrementAndGet());
-                        gcm.send(SENDER_ID + "@gcm.googleapis.com", id, data);
-                        msg = "Sent message";
-                    } catch (IOException ex) {
-                        msg = "Error :" + ex.getMessage();
-                    }
+                    mLocationClient.disconnect();
+                    mLocationClient.connect();
+                    Bundle data = new Bundle();
+                    data.putString("my_message", "Hello World");
+                    data.putString("my_action",
+                            "com.google.android.gcm.demo.app.ECHO_NOW");
+                    String id = Integer.toString(msgId.incrementAndGet());
+                    //gcm.send(SENDER_ID + "@gcm.googleapis.com", id, data);
+                    final SharedPreferences prefs = getPreferences();
+                    String registrationId = prefs.getString(REG_ID, "");
+                    Location mLocation=mLocationClient.getLastLocation();
+                    String mLat=Double.toString(mLocation.getLatitude());
+                    String mLng=Double.toString(mLocation.getLongitude());
+                    FlareFunction.FlareSend(registrationId,JsonIO.fileToJson("friends",getApplicationContext()),mLat,mLng);
+                    msg = "Sent flare";
                     return msg;
                 }
 
                 @Override
                 protected void onPostExecute(String msg) {
-                    mDisplay.append(msg + "\n");
+                    Log.e("send_result",msg);
                 }
             }.execute(null, null, null);
-        } else if (view == findViewById(R.id.clear)) {
-            mDisplay.setText("");
         }
     }
 
+    private SharedPreferences getPreferences() {
+        return getSharedPreferences("profilo", Context.MODE_PRIVATE);
+    }
     /**
      * Sends the registration ID to your server over HTTP, so it can use GCM/HTTP
      * or CCS to send messages to your app. Not needed for this demo since the
@@ -388,7 +401,7 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
 
     //get hash key
     // Add code to print out the key hash
-       public void getKeyHash(){
+    public void getKeyHash() {
         try {
             PackageInfo info = getPackageManager().getPackageInfo("com.sfcoding.flare", PackageManager.GET_SIGNATURES);
             for (Signature signature : info.signatures) {
@@ -403,7 +416,8 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
             //Toast.makeText(getApplicati
         } catch (NoSuchAlgorithmException e) {
             Log.e("ProfileActivity:", "NoSuchAlgorithmException" + e);
-        }}
+        }
+    }
 
 
     /**
@@ -456,7 +470,6 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
             throw new RuntimeException("Could not get package name: " + e);
         }
     }
-
 
 
     private boolean checkPlayServices() {
