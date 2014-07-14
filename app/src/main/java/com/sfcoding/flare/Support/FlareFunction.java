@@ -30,13 +30,13 @@ public class FlareFunction {
 
     private static HttpClient httpclient = null;
 
-    public static Boolean FlareSend(final String FB_ID, final JSONArray flareTargetList, final String lat,final String lng) {
+    public static Boolean FlareSend(final String id_fb, final JSONArray flareTargetList, final String lat,final String lng) {
         new AsyncTask<Void, Void, String>() {
             @Override
             protected String doInBackground(Void... args) {
                 String ris;
-                ris = httpPostConnection("flare_send", new String[]{"FB_ID", "target_list", "lat","lng"}, new String[]{FB_ID, flareTargetList.toString(),lat,lng});
-                Log.e("flareReceive_ris: ", ris);
+                ris = httpPostConnection("flare_send", new String[]{"id_fb", "target_list", "lat","lng"}, new String[]{id_fb, flareTargetList.toString(),lat,lng});
+                Log.e("flareSend_ris: ", ris);
                 return ris;
             }
 
@@ -48,12 +48,12 @@ public class FlareFunction {
         return true;
     }
 
-    public static Boolean FlareResponse(final String FB_ID, final JSONArray FRIEND_ID, final String lat,final String lng){
+    public static Boolean FlareResponse(final String id_fb, final JSONArray id_friend, final String lat,final String lng){
         new AsyncTask<Void, Void, String>() {
             @Override
             protected String doInBackground(Void... args) {
                 String ris;
-                ris = httpPostConnection("flare_response", new String[]{"FB_ID", "target_list", "lat","lng"}, new String[]{FB_ID, FRIEND_ID.toString(),lat,lng});
+                ris = httpPostConnection("flare_response", new String[]{"FB_ID", "target_list", "lat","lng"}, new String[]{id_fb, id_friend.toString(),lat,lng});
                 Log.e("sendFlare_ris: ", ris);
                 return ris;
             }
@@ -66,12 +66,30 @@ public class FlareFunction {
         return true;
     }
 
-    private static String httpPostConnection(String url, String[] name, String[] param) {
+    public static Boolean RegisterId(final String id_fb, final String reg_id){
+        new AsyncTask<Void, Void, String>() {
+            @Override
+            protected String doInBackground(Void... args) {
+                String ris;
+                ris = httpPostConnection("register", new String[]{"id_fb","reg_id"}, new String[]{id_fb, reg_id});
+                Log.e("register_ris: ", ris);
+                return ris;
+            }
+
+            @Override
+            protected void onPostExecute(String result) {
+
+            }
+        }.execute();
+        return true;
+    }
+
+    public static String httpPostConnection(String url, String[] name, String[] param) {
         httpclient = getHttpclient();
         HttpPost httppost = new HttpPost(URL + url);
         String ris="";
         try {
-            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
             for (int i = 0; i < name.length; i++) {
                 nameValuePairs.add(new BasicNameValuePair(name[i], param[i]));
             }

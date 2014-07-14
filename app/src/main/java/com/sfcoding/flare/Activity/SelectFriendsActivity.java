@@ -54,6 +54,7 @@ public class SelectFriendsActivity extends Activity {
     List<GraphUser> friends;
     FriendsAdapter dataAdapter;
     ArrayList<Person> newchosen=new ArrayList<Person>();
+    static Boolean check_running_mode=false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +62,7 @@ public class SelectFriendsActivity extends Activity {
         setContentView(R.layout.activity_select_friends);
         listView = (ListView) findViewById(R.id.listFriends);
         initView();
+        check_running_mode=true;
     }
 
     private void initView() {
@@ -72,10 +74,9 @@ public class SelectFriendsActivity extends Activity {
         //Controllo sessione FB
         Session session = Session.getActiveSession();
         if (session != null && session.isOpened()) {
-            //se c'è la sessione e internet accessibile richiedo subito la lista amici
+            //se c'è la sessione e internet accessibile la lista amici
             if (networkInfo != null && networkInfo.isConnected()) {
                 requestMyAppFacebookFriends(session);
-
 
             } else {
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(SelectFriendsActivity.this);
@@ -97,8 +98,6 @@ public class SelectFriendsActivity extends Activity {
             public void onCompleted(Response response) {
                 friends = getResults(response);
                 friendsList = new ArrayList<Person>();
-                //GraphUser use = friends.get(1);
-                //Log.e("utente", use.getUsername());
                 for (GraphUser user : friends) {
                     Person friend = new Person();
                     friend.setId(user.getId());
@@ -106,7 +105,7 @@ public class SelectFriendsActivity extends Activity {
                     Log.e("amico", friend.getId());
                     friendsList.add(friend);
                 }
-                dataAdapter = new FriendsAdapter(SelectFriendsActivity.this, R.layout.friends_row, friendsList,newchosen,Group.Friends);
+                dataAdapter = new FriendsAdapter(SelectFriendsActivity.this, R.layout.friends_row, friendsList);
                 listView.setAdapter(dataAdapter);
             }
         });
@@ -177,5 +176,18 @@ public class SelectFriendsActivity extends Activity {
             startActivity(intent);
         }
         return super.onOptionsItemSelected(item);
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        check_running_mode = true;
+    }
+
+    @Override
+    protected void onPause() {
+        check_running_mode = false;
+
+        super.onPause();
     }
 }

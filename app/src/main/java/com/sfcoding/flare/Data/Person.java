@@ -10,6 +10,11 @@ import com.google.android.gms.maps.model.LatLng;
  */
 public class Person {
     public int numParam;
+    public String id;
+    public String name;
+    public Double lastLat = Double.valueOf(91);
+    public Double lastLng = Double.valueOf(181);
+    public Bitmap photo;
 
     public void setId(String id) {
         this.id = id;
@@ -31,27 +36,23 @@ public class Person {
         this.photo = photo;
     }
 
-    public String id;
-    public String name;
-    public Double lastLat= Double.valueOf(91);
-    public Double lastLng= Double.valueOf(181);
-    public Bitmap photo;
 
-    public Person(){
+    public Person() {
 
     }
-    public Person(String id, String name, Double lastLat,Double lastLng, Bitmap photo) {
+
+    public Person(String id, String name, Double lastLat, Double lastLng, Bitmap photo) {
         this.id = id;
         this.name = name;
         this.photo = photo;
         this.lastLat = lastLat;
-        this.lastLng=lastLng;
-        numParam=5;
+        this.lastLng = lastLng;
+        numParam = 5;
     }
 
-    public void setLastLatLng(Double lat,Double lastLng){
-        this.lastLat=lat;
-        this.lastLng=lat;
+    public void setLastLatLng(Double lat, Double lastLng) {
+        this.lastLat = lat;
+        this.lastLng = lat;
     }
 
     public String getName() {

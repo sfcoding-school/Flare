@@ -2,7 +2,9 @@ package com.sfcoding.flare.Activity;
 
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -66,9 +68,12 @@ public class ProfileActivity extends Activity {
                                     if (user != null) {
                                         Log.i(TAG, "User ID " + user.getId());
                                         Log.i(TAG, "Email " + user.asMap().get("email"));
-                                        lblEmail.setText(user.asMap().get("email").toString());
+                                        lblEmail.setText(user.asMap().get("id").toString());
+                                        SharedPreferences preferences=getSharedPreferences("com.sfcoding.flare", Context.MODE_PRIVATE);
+                                        preferences.edit().putString("id_fb",user.getId()).commit();
                                         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                                         startActivity(intent);
+
                                     }
                                 }
                             }

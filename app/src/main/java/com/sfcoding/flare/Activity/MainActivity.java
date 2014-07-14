@@ -47,6 +47,7 @@ import com.sfcoding.flare.Support.FlareFunction;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.security.MessageDigest;
@@ -63,6 +64,7 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     private static String FB_ID;
     public final String REG_ID = "reg_id";
+    public static Location mLocation;
     /**
      * Substitute you own sender ID here. This is the project number you got
      * from the API Console, as described in "Getting Started."
@@ -84,9 +86,20 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
     private GoogleMap mMap;
     LatLng mLatLng;
     String regid;
+    String id_fb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Session session = getSession(this);
+        if (!session.isOpened()) {
+            Intent newact = new Intent(this, ProfileActivity.class);
+            startActivity(newact);
+        }
+        try {
+            JsonIO.loadFriends("friends",getApplicationContext());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         context = getApplicationContext();
@@ -95,16 +108,20 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
         mMap.setMyLocationEnabled(true);
         mLocationClient = new LocationClient(this, this, this);
         mLocationClient.connect();
-        //mDisplay = (TextView) findViewById(R.id.display);
+
 
 
         //GCM
         if (checkPlayServices()) {
+            SharedPreferences preferences =getSharedPreferences("com.sfcoding.flare", Context.MODE_PRIVATE);
+            id_fb=preferences.getString("id_fb","");
+            Log.e("fb_id",id_fb);
             gcm = GoogleCloudMessaging.getInstance(this);
             regid = getRegistrationId(context);
             Log.e("regid", regid);
-            if (regid.isEmpty())
-                registerInBackground();
+            if (regid.isEmpty()) {
+                registerInBackground(id_fb);
+            }
         } else
             Log.e("Errore: ", "No valid Google Play Service APK found.");
 
@@ -140,12 +157,8 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
     public void onConnected(Bundle dataBundle) {
         // Display the connection status
         Toast.makeText(this, "Connected", Toast.LENGTH_SHORT).show();
-        Location mLocation = new Location(mLocationClient.getLastLocation());
-        mLatLng = new LatLng(mLocation.getLatitude(), mLocation.getLongitude());
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mLatLng, 18));
-        mMap.addMarker(new MarkerOptions()
-                .position(mLatLng)
-                .title("Hello world!").icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_launcher)));
+        mLocation=mLocationClient.getLastLocation();
+
 
     }
 
@@ -204,9 +217,6 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
             Intent newact = new Intent(this, ProfileActivity.class);
             startActivity(newact);
         }
-
-        Person prova = new Person("500", "userprova", 50.0, 50.0, null);
-        Group.addFriend(prova);
         try {
             JsonIO.saveFriends(Group.Friends, getApplicationContext(), "friends");
         } catch (JSONException e) {
@@ -287,29 +297,35 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
 
     public void onClick(final View view) {
         // Perform action on click
-        mDisplay.setText("");
         if (view == findViewById(R.id.flare)) {
 
             new AsyncTask<Void, Void, String>() {
                 @Override
                 protected String doInBackground(Void... params) {
                     String msg = "";
-
                     mLocationClient.disconnect();
                     mLocationClient.connect();
-                    Bundle data = new Bundle();
-                    data.putString("my_message", "Hello World");
-                    data.putString("my_action",
-                            "com.google.android.gcm.demo.app.ECHO_NOW");
-                    String id = Integer.toString(msgId.incrementAndGet());
-                    //gcm.send(SENDER_ID + "@gcm.googleapis.com", id, data);
-                    final SharedPreferences prefs = getPreferences();
-                    String registrationId = prefs.getString(REG_ID, "");
-                    Location mLocation=mLocationClient.getLastLocation();
+
                     String mLat=Double.toString(mLocation.getLatitude());
                     String mLng=Double.toString(mLocation.getLongitude());
-                    FlareFunction.FlareSend(registrationId,JsonIO.fileToJson("friends",getApplicationContext()),mLat,mLng);
-                    msg = "Sent flare";
+                    Log.e("mie pos",mLat+mLng);
+                    JSONArray jsonArray= JsonIO.fileToJson("friends",getApplicationContext());
+                    try {
+                        JsonIO.loadFriends("friends",getApplicationContext());
+                        for(Person person:Group.Friends){
+                            Log.e("amico registrato", person.getId());
+                        }
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    try {
+                        Log.e("primo_amico",jsonArray.getJSONObject(0).getString("ID"));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                    FlareFunction.FlareSend(id_fb,jsonArray, mLat, mLng);
                     return msg;
                 }
 
@@ -340,7 +356,7 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
      * Stores the registration ID and app versionCode in the application's
      * shared preferences.
      */
-    private void registerInBackground() {
+    private void registerInBackground(final String id_fb) {
         new AsyncTask<String, Void, String>() {
             @Override
             protected String doInBackground(String... strings) {
@@ -350,6 +366,8 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
                         gcm = GoogleCloudMessaging.getInstance(context);
                     }
                     regid = gcm.register(SENDER_ID);
+                    //FlareFunction.httpPostConnection("register",new String[]{"id_fb","reg_id"},new String[]{id_fb,regid});
+                    FlareFunction.RegisterId(id_fb,regid);
                     msg = "Device registered, registration ID=" + regid;
                     Log.e("prova:", msg);
 
@@ -377,7 +395,7 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
 
             @Override
             protected void onPostExecute(String msg) {
-                mDisplay.append(msg + "\n");
+
             }
         }.execute(null, null, null);
     }

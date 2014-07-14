@@ -39,4 +39,10 @@ public class Group {
         return  null;
     }
 
+    public static void updatePos(double newLat, double newLng,String id){
+        Person person=searchById(id);
+        person.setLastLat(newLat);
+        person.setLastLng(newLng);
+    }
+
 }

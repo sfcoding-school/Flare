@@ -22,14 +22,6 @@ import java.util.ArrayList;
  * Created by Andrea on 07/07/2014.
  */
 public class JsonIO {
-    public static void writeJsonOnFile(Context context, JSONArray array) throws JSONException {
-        JSONObject dato = new JSONObject();
-        dato.put("num", 500);
-        Log.e("object", dato.getString("num"));
-        JSONArray dati = new JSONArray();
-        dati.put(dato);
-        Log.e("json:", dati.getJSONObject(0).getString("num"));
-    }
 
     //called by saveFriends
     public static JSONArray fromFriendsToJson(ArrayList<Person> friends) throws JSONException {
@@ -85,18 +77,20 @@ public class JsonIO {
         return null;
     }
 
-    public static void  loadFriends(String fileName, Context context) throws JSONException {
+    public static void loadFriends(String fileName, Context context) throws JSONException {
         Group.removeAll();
         JSONArray jsonArray = fileToJson(fileName, context);
-        JSONObject object;
-        for (int i = 0; i < jsonArray.length(); i++) {
-            object = jsonArray.getJSONObject(i);
-            Person person = new Person();
-            person.name = object.getString("name");
-            person.id = object.getString("ID");
-            person.lastLat=object.getDouble("lastLat");
-            person.lastLng=object.getDouble("lastLng");
-            Group.addFriend(person);
+        if (jsonArray != null) {
+            JSONObject object;
+            for (int i = 0; i < jsonArray.length(); i++) {
+                object = jsonArray.getJSONObject(i);
+                Person person = new Person();
+                person.name = object.getString("name");
+                person.id = object.getString("ID");
+                person.lastLat = object.getDouble("lastLat");
+                person.lastLng = object.getDouble("lastLng");
+                Group.addFriend(person);
+            }
         }
     }
 }

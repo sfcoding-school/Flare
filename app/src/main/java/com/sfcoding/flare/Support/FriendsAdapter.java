@@ -34,17 +34,14 @@ public class FriendsAdapter extends ArrayAdapter<Person> {
     public ArrayList<Person> friendList;
     private Context context;
     private FriendsAdapter adapter;
-    private ArrayList<Person> newchosen;
-    private ArrayList<Person> chosen;
 
 
-    public FriendsAdapter(Context context, int textViewResourceId, ArrayList<Person> friendList, ArrayList<Person> newchosen, ArrayList<Person> chosen) {
+
+    public FriendsAdapter(Context context, int textViewResourceId, ArrayList<Person> friendList) {
         super(context, textViewResourceId, friendList);
         this.friendList = new ArrayList<Person>();
         this.context = context;
         this.friendList.addAll(friendList);
-        this.newchosen = newchosen;
-        this.chosen = chosen;
     }
 
     private class ViewHolder {

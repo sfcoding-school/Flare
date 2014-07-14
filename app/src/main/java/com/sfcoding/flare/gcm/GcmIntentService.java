@@ -12,7 +12,10 @@ import android.util.Log;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.sfcoding.flare.Activity.MainActivity;
+import com.sfcoding.flare.Data.Group;
 import com.sfcoding.flare.R;
+
+import java.lang.reflect.Field;
 
 public class GcmIntentService extends IntentService {
     public static final int NOTIFICATION_ID = 1;
@@ -48,19 +51,19 @@ public class GcmIntentService extends IntentService {
                 // If it's a regular GCM message, do some work.
             } else if (GoogleCloudMessaging.
                     MESSAGE_TYPE_MESSAGE.equals(messageType)) {
-                // This loop represents the service doing some work.
-                for (int i = 0; i < 5; i++) {
-                    Log.i("bo", "Working... " + (i + 1)
-                            + "/5 @ " + SystemClock.elapsedRealtime());
-                    try {
-                        Thread.sleep(5000);
-                    } catch (InterruptedException e) {
-                    }
+                sendNotification("Received: " + extras.getString("param1"));
+                //la notifica è di tipo "chiedi", al click posso mandare la mia posizione
+                if(extras.getString("tipo").equals("richiesta")){
+                    Log.e("amico",Group.Friends.get(0).getId());
+                    sendNotification(Group.searchById(extras.getString("id_fb")).getId() + extras.getString("name"));
                 }
-                Log.i("bo", "Completed work @ " + SystemClock.elapsedRealtime());
-                // Post notification of received message.
-                sendNotification("Received: " + extras.toString());
+                if (false) {
+                    Log.e("intent", "notifica arrivata");
+                } else
+                    sendNotification("Received: " + extras.getString("param1"));
                 Log.i("bo", "Received: " + extras.toString());
+
+
             }
         }
         // Release the wake lock provided by the WakefulBroadcastReceiver.
@@ -84,7 +87,7 @@ public class GcmIntentService extends IntentService {
                         .setStyle(new NotificationCompat.BigTextStyle()
                                 .bigText(msg))
                         .setContentText(msg);
-
+        mBuilder.setAutoCancel(true);
         mBuilder.setContentIntent(contentIntent);
         mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
     }
