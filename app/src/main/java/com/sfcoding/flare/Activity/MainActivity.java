@@ -204,6 +204,7 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
     @Override
     protected void onStart() {
         super.onStart();
+        //setto la telecamera sulla mia ultima posizione salvata
         SharedPreferences pref = getSharedPreferences("com.sfcoding.flare", Context.MODE_PRIVATE);
         id_fb = pref.getString("id_fb", "");
         Double lat = Double.parseDouble(pref.getString("lat", "-100"));
@@ -230,7 +231,6 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
 
 
     }
-
     public void flareDialog(final String sender_id){
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
 
