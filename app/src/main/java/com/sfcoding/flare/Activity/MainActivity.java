@@ -21,6 +21,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.facebook.*;
@@ -97,7 +98,7 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
             }
         }
 
-
+        //Riceve i messaggi inviati dall intentService
         handlerService = new Handler() {
             @Override
             public void handleMessage(Message msg) {
@@ -121,6 +122,8 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
         setContentView(R.layout.activity_main);
         context = getApplicationContext();
         getKeyHash();
+        Button tiny = (Button)findViewById(R.id.flare);
+        tiny.setBackgroundResource(R.drawable.button);
         mMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
         mMap.setMyLocationEnabled(true);
         mLocationClient = new LocationClient(this, this, this);
@@ -259,9 +262,6 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
         alertDialog.setNegativeButton("NO", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
 
-
-                // Write your code here to invoke NO event
-                Toast.makeText(getApplicationContext(), "You clicked on NO", Toast.LENGTH_SHORT).show();
                 dialog.cancel();
             }
         });

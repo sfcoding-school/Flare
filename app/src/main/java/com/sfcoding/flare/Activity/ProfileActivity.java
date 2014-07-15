@@ -50,9 +50,7 @@ public class ProfileActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
-        lblEmail = (TextView) findViewById(R.id.lblEmail);
         LoginButton authButton = (LoginButton) findViewById(R.id.authButton);
-        Button back= (Button) findViewById(R.id.mainButton);
         authButton.setOnErrorListener(new LoginButton.OnErrorListener() {
 
             @Override
@@ -76,8 +74,6 @@ public class ProfileActivity extends Activity {
                                 public void onCompleted(GraphUser user, Response response) {
                                     if (user != null) {
                                         Log.i(TAG, "User ID " + user.getId());
-                                        Log.i(TAG, "Email " + user.asMap().get("email"));
-                                        lblEmail.setText(user.asMap().get("id").toString());
                                         SharedPreferences preferences=getSharedPreferences("com.sfcoding.flare", Context.MODE_PRIVATE);
                                         preferences.edit().putString("id_fb",user.getId()).commit();
                                          regid = getRegistrationId(getApplicationContext());

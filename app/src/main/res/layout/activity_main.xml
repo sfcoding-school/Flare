@@ -8,7 +8,7 @@
         android:name="com.google.android.gms.maps.MapFragment"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
-        android:layout_marginBottom="0pt"
+        android:layout_marginBottom="10pt"
         android:layout_marginLeft="5pt"
         android:layout_marginRight="5pt"
         android:layout_marginTop="5pt"
@@ -23,12 +23,12 @@
 
         <Button
             android:id="@+id/flare"
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
+            android:layout_width="160px"
+            android:layout_height="160px"
             android:layout_gravity="center"
+            android:layout_marginBottom="5pt"
             android:layout_weight="1"
             android:onClick="onClick"
-            android:text="Flare"
             android:background="@drawable/flare"/>
     </LinearLayout>
 
