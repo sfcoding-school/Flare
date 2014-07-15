@@ -16,6 +16,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -48,13 +49,13 @@ public class FlareFunction {
         return true;
     }
 
-    public static Boolean FlareResponse(final String id_fb, final JSONArray id_friend, final String lat,final String lng){
+    public static Boolean FlareResponse(final String id_fb, final String id_friend, final String lat,final String lng){
         new AsyncTask<Void, Void, String>() {
             @Override
             protected String doInBackground(Void... args) {
                 String ris;
-                ris = httpPostConnection("flare_response", new String[]{"FB_ID", "target_list", "lat","lng"}, new String[]{id_fb, id_friend.toString(),lat,lng});
-                Log.e("sendFlare_ris: ", ris);
+                ris = httpPostConnection("flare_response", new String[]{"sender_id", "receiver_id", "lat","lng"}, new String[]{id_fb, id_friend,lat,lng});
+                Log.e("flareResponse_ris: ", ris);
                 return ris;
             }
 

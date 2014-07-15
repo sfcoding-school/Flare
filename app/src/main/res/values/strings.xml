@@ -17,5 +17,8 @@
     <string name="no_connection">Connessione Assente</string>
     <string name="errFB">Errore Facebook</string>
     <color name="lightGray">#EEEEEE</color>
+    <string name="ok">ok</string>
+    <string name="annulla">annulla</string>
+    <string name="flare_request">Vuoi fornire la tua posizione?</string>
 
 </resources>

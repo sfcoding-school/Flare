@@ -8,6 +8,8 @@ import com.sfcoding.flare.Data.Person;
  * Created by Andrea on 06/07/2014.
  */
 public class Group {
+
+    public static int dim=0;
     public static ArrayList<Person> Friends = new ArrayList<Person>();
 
     public static Person findFriend(String id) {
@@ -17,19 +19,24 @@ public class Group {
     }
 
     public static Boolean rmFriend(String id) {
+        dim-=1;
         return Friends.remove(findFriend(id));
+
     }
 
     public static void addFriend(Person friend) {
         Friends.add(friend);
+        dim+=1;
     }
 
     public static void rmFriend(int i) {
         Friends.remove(i);
+        dim-=1;
     }
 
     public static void removeAll() {
         Friends.removeAll(Friends);
+        dim=0;
     }
 
     public static Person searchById(String id) {
@@ -39,10 +46,6 @@ public class Group {
         return  null;
     }
 
-    public static void updatePos(double newLat, double newLng,String id){
-        Person person=searchById(id);
-        person.setLastLat(newLat);
-        person.setLastLng(newLng);
-    }
+
 
 }

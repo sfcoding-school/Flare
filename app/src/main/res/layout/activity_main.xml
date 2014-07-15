@@ -3,28 +3,33 @@
     android:layout_height="fill_parent"
     android:orientation="vertical">
 
-            <fragment xmlns:android="http://schemas.android.com/apk/res/android"
-                android:id="@+id/map"
-                android:layout_width="1000px"
-                android:layout_height="409dp"
-                android:name="com.google.android.gms.maps.MapFragment"
-                android:layout_marginLeft="40px"
-                android:layout_marginTop="40px"
-                android:layout_marginRight="40px" />
+    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.MapFragment"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_marginBottom="0pt"
+        android:layout_marginLeft="5pt"
+        android:layout_marginRight="5pt"
+        android:layout_marginTop="5pt"
+        android:layout_weight="0.85"
+        />
 
-   <LinearLayout
-       android:layout_width="match_parent"
-       android:layout_height="match_parent"
-android:orientation="horizontal" >
-    <Button
-                android:id="@+id/flare"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:onClick="onClick"
-                android:layout_centerHorizontal="true"
-                android:text="Flare"
-                android:layout_alignParentTop="true"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:layout_weight="0.15">
 
-
-   </LinearLayout>
+        <Button
+            android:id="@+id/flare"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:onClick="onClick"
+            android:text="Flare"
+            android:background="@drawable/flare"/>
     </LinearLayout>
+
+</LinearLayout>

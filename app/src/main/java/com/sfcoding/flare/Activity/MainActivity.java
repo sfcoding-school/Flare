@@ -1,7 +1,9 @@
 package com.sfcoding.flare.Activity;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
@@ -9,21 +11,19 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.location.Location;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.provider.ContactsContract;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
+
 import android.widget.Toast;
 
 import com.facebook.*;
-import com.facebook.model.*;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -34,10 +34,8 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import com.sfcoding.flare.Activity.ProfileActivity;
 import com.sfcoding.flare.Data.Group;
 import com.sfcoding.flare.Data.Person;
 import com.sfcoding.flare.R;
@@ -47,59 +45,78 @@ import com.sfcoding.flare.Support.FlareFunction;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
-import java.io.IOException;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicInteger;
+
 
 
 public class MainActivity extends Activity implements GooglePlayServicesClient.ConnectionCallbacks,
         GooglePlayServicesClient.OnConnectionFailedListener {
-    public static final String EXTRA_MESSAGE = "message";
-    public static final String PROPERTY_REG_ID = "registration_id";
-    private static final String PROPERTY_APP_VERSION = "appVersion";
-    private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
-    private static String FB_ID;
-    public final String REG_ID = "reg_id";
-    public static Location mLocation;
-    /**
-     * Substitute you own sender ID here. This is the project number you got
-     * from the API Console, as described in "Getting Started."
-     */
-    String SENDER_ID = "954849159915";
 
-    /**
-     * Tag used on log messages.
-     */
+    private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
+
+    public static Location mLocation;
+
     static final String TAG = "GCMDemo";
     private final static int
             CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
-    TextView mDisplay;
     GoogleCloudMessaging gcm;
-    AtomicInteger msgId = new AtomicInteger();
-    SharedPreferences prefs;
     Context context;
     LocationClient mLocationClient;
     private GoogleMap mMap;
     LatLng mLatLng;
-    String regid;
     String id_fb;
+    public static Handler handlerService = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Session session = getSession(this);
+        try {
+            JsonIO.loadFriends("friends", getApplicationContext());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         if (!session.isOpened()) {
             Intent newact = new Intent(this, ProfileActivity.class);
             startActivity(newact);
         }
         try {
-            JsonIO.loadFriends("friends",getApplicationContext());
+            JsonIO.loadFriends("friends", getApplicationContext());
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+
+            final String sender_id = extras.getString("id_fb");
+            if (!sender_id.equals("")) {
+                flareDialog(sender_id);
+
+            }
+        }
+
+
+        handlerService = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                Log.e("SERVICEHANDLER", "arrivato il messaggio " + msg.toString());
+                Bundle b = msg.getData();
+                mMap.clear();
+                placeMarker();
+                if (b.getInt("dialog") == 1) {
+                    Log.e("op", "aggiorno");
+                    final String sender_id = b.getString("sender_id");
+                    if (!sender_id.equals("")) {
+                        flareDialog(sender_id);
+                    }
+                }
+
+            }
+
+        };
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         context = getApplicationContext();
@@ -110,42 +127,13 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
         mLocationClient.connect();
 
 
-
         //GCM
         if (checkPlayServices()) {
-            SharedPreferences preferences =getSharedPreferences("com.sfcoding.flare", Context.MODE_PRIVATE);
-            id_fb=preferences.getString("id_fb","");
-            Log.e("fb_id",id_fb);
             gcm = GoogleCloudMessaging.getInstance(this);
-            regid = getRegistrationId(context);
-            Log.e("regid", regid);
-            if (regid.isEmpty()) {
-                registerInBackground(id_fb);
-            }
+
         } else
             Log.e("Errore: ", "No valid Google Play Service APK found.");
 
-
-        // start Facebook Login
-        /*Session.openActiveSession(this, true, new Session.StatusCallback() {
-            // callback when session changes state
-            @Override
-            public void call(Session session, SessionState state, Exception exception) {
-                if (session.isOpened()) {
-                    // make request to the /me API
-                    Request.newMeRequest(session, new Request.GraphUserCallback() {
-                        // callback after Graph API response with user object
-                        @Override
-                        public void onCompleted(GraphUser user, Response response) {
-                            if (user != null) {
-                                TextView welcome = (TextView) findViewById(R.id.display);
-                                welcome.setText("Hello " + user.getId() + "!");
-                            }
-                        }
-                    }).executeAsync();
-                }
-            }
-        });*/
     }
 
     /*
@@ -155,9 +143,11 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
      */
     @Override
     public void onConnected(Bundle dataBundle) {
-        // Display the connection status
-        Toast.makeText(this, "Connected", Toast.LENGTH_SHORT).show();
-        mLocation=mLocationClient.getLastLocation();
+        mLocation = mLocationClient.getLastLocation();
+        SharedPreferences preferences = getSharedPreferences("com.sfcoding.flare", Context.MODE_PRIVATE);
+        //salvo la mia posizione sulle preferences così da poterla avere sull onCreate
+        preferences.edit().putString("lat", Double.toString(mLocation.getLatitude())).apply();
+        preferences.edit().putString("lng", Double.toString(mLocation.getLongitude())).apply();
 
 
     }
@@ -211,26 +201,76 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
     @Override
     protected void onStart() {
         super.onStart();
+        SharedPreferences pref = getSharedPreferences("com.sfcoding.flare", Context.MODE_PRIVATE);
+        id_fb = pref.getString("id_fb", "");
+        Double lat = Double.parseDouble(pref.getString("lat", "-100"));
+        Double lng = Double.parseDouble(pref.getString("lng", "-100"));
+        Log.e("my_lat", Double.toString(lat));
+        if (lat != -100) {
+            mLatLng = new LatLng(lat, lng);
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mLatLng, 18));
+        }
+
         Session session = getSession(this);
-        Boolean aBoolean = session.isOpened();
         if (!session.isOpened()) {
             Intent newact = new Intent(this, ProfileActivity.class);
             startActivity(newact);
         }
         try {
-            JsonIO.saveFriends(Group.Friends, getApplicationContext(), "friends");
+            JsonIO.loadFriends("friends", getApplicationContext());
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        placeMarker();
 
         //POSIZIONO I MARKER IN BASE ALLE ULTIME INFO
+        placeMarker();
 
 
     }
 
+    public void flareDialog(final String sender_id){
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
+
+        // Setting Dialog Title
+        alertDialog.setTitle("Flare Response");
+
+        // Setting Dialog Message
+        alertDialog.setMessage("Rispondere al flare di " + Group.searchById(sender_id).getName());
+
+        // Setting Icon to Dialog
+        alertDialog.setIcon(R.drawable.flare);
+
+        // Setting Positive "Yes" Button
+        alertDialog.setPositiveButton("Si", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                FlareFunction.FlareResponse(id_fb, sender_id, Double.toString(mLocation.getLatitude()), Double.toString(mLocation.getLongitude()));
+
+            }
+        });
+        // Setting Negative "NO" Button
+        alertDialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+
+                dialog.cancel();
+            }
+        });
+
+        // Setting Negative "NO" Button
+        alertDialog.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+
+
+                // Write your code here to invoke NO event
+                Toast.makeText(getApplicationContext(), "You clicked on NO", Toast.LENGTH_SHORT).show();
+                dialog.cancel();
+            }
+        });
+
+        // Showing Alert Message
+        alertDialog.show();
+    }
     //Apre il json con gli amici e le loro ultime posizioni e piazza i marker sulla mappa
-    public void placeMarker(){
+    public void placeMarker() {
         try {
             JsonIO.loadFriends("friends", getApplicationContext());
         } catch (JSONException e) {
@@ -298,124 +338,40 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
     public void onClick(final View view) {
         // Perform action on click
         if (view == findViewById(R.id.flare)) {
+            if (Group.dim == 0) {
+                //se non ho scelto ancora deglki amici manda una label
+                CharSequence text = "Scegli gli amici prima";
+                int duration = Toast.LENGTH_SHORT;
+                Toast toast = Toast.makeText(context, text, duration);
+                toast.show();
 
-            new AsyncTask<Void, Void, String>() {
-                @Override
-                protected String doInBackground(Void... params) {
-                    String msg = "";
-                    mLocationClient.disconnect();
-                    mLocationClient.connect();
+            } else {
 
-                    String mLat=Double.toString(mLocation.getLatitude());
-                    String mLng=Double.toString(mLocation.getLongitude());
-                    Log.e("mie pos",mLat+mLng);
-                    JSONArray jsonArray= JsonIO.fileToJson("friends",getApplicationContext());
-                    try {
-                        JsonIO.loadFriends("friends",getApplicationContext());
-                        for(Person person:Group.Friends){
-                            Log.e("amico registrato", person.getId());
-                        }
+                new AsyncTask<Void, Void, String>() {
+                    @Override
+                    protected String doInBackground(Void... params) {
+                        String msg = "";
+                        mLocationClient.disconnect();
+                        mLocationClient.connect();
+                        String mLat = Double.toString(mLocation.getLatitude());
+                        String mLng = Double.toString(mLocation.getLongitude());
+                        Log.e("mie pos", mLat + " " + mLng);
 
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    try {
-                        Log.e("primo_amico",jsonArray.getJSONObject(0).getString("ID"));
-                    } catch (JSONException e) {
-                        e.printStackTrace();
+                        JSONArray jsonArray = JsonIO.fileToJson("friends", getApplicationContext());
+                        FlareFunction.FlareSend(id_fb, jsonArray, mLat, mLng);
+
+                        return msg;
                     }
 
-                    FlareFunction.FlareSend(id_fb,jsonArray, mLat, mLng);
-                    return msg;
-                }
-
-                @Override
-                protected void onPostExecute(String msg) {
-                    Log.e("send_result",msg);
-                }
-            }.execute(null, null, null);
+                    @Override
+                    protected void onPostExecute(String msg) {
+                        Log.e("send_result", msg);
+                    }
+                }.execute(null, null, null);
+            }
         }
     }
 
-    private SharedPreferences getPreferences() {
-        return getSharedPreferences("profilo", Context.MODE_PRIVATE);
-    }
-    /**
-     * Sends the registration ID to your server over HTTP, so it can use GCM/HTTP
-     * or CCS to send messages to your app. Not needed for this demo since the
-     * device sends upstream messages to a server that echoes back the message
-     * using the 'from' address in the message.
-     */
-    private void sendRegistrationIdToBackend() {
-        // Your implementation here.
-    }
-
-    /**
-     * Registers the application with GCM servers asynchronously.
-     * <p/>
-     * Stores the registration ID and app versionCode in the application's
-     * shared preferences.
-     */
-    private void registerInBackground(final String id_fb) {
-        new AsyncTask<String, Void, String>() {
-            @Override
-            protected String doInBackground(String... strings) {
-                String msg = "";
-                try {
-                    if (gcm == null) {
-                        gcm = GoogleCloudMessaging.getInstance(context);
-                    }
-                    regid = gcm.register(SENDER_ID);
-                    //FlareFunction.httpPostConnection("register",new String[]{"id_fb","reg_id"},new String[]{id_fb,regid});
-                    FlareFunction.RegisterId(id_fb,regid);
-                    msg = "Device registered, registration ID=" + regid;
-                    Log.e("prova:", msg);
-
-                    // You should send the registration ID to your server over HTTP,
-                    // so it can use GCM/HTTP or CCS to send messages to your app.
-                    // The request to your server should be authenticated if your app
-                    // is using accounts.
-                    sendRegistrationIdToBackend();
-
-                    // For this demo: we don't need to send it because the device
-                    // will send upstream messages to a server that echo back the
-                    // message using the 'from' address in the message.
-
-                    // Persist the regID - no need to register again.
-                    storeRegistrationId(context, regid);
-                } catch (IOException ex) {
-                    msg = "Error :" + ex.getMessage();
-                    Log.e("MainActivity", msg);
-                    // If there is an error, don't just keep trying to register.
-                    // Require the user to click a button again, or perform
-                    // exponential back-off.
-                }
-                return msg;
-            }
-
-            @Override
-            protected void onPostExecute(String msg) {
-
-            }
-        }.execute(null, null, null);
-    }
-
-    /**
-     * Stores the registration ID and app versionCode in the application's
-     * {@code SharedPreferences}.
-     *
-     * @param context application's context.
-     * @param regId   registration ID
-     */
-    private void storeRegistrationId(Context context, String regId) {
-        final SharedPreferences prefs = getGCMPreferences(context);
-        int appVersion = getAppVersion(context);
-        Log.i(TAG, "Saving regId on app version " + appVersion);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putString(PROPERTY_REG_ID, regId);
-        editor.putInt(PROPERTY_APP_VERSION, appVersion);
-        editor.commit();
-    }
 
     //get hash key
     // Add code to print out the key hash
@@ -439,33 +395,6 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
 
 
     /**
-     * Gets the current registration ID for application on GCM service.
-     * <p/>
-     * If result is empty, the app needs to register.
-     *
-     * @return registration ID, or empty string if there is no existing
-     * registration ID.
-     */
-    private String getRegistrationId(Context context) {
-        final SharedPreferences prefs = getGCMPreferences(context);
-        String registrationId = prefs.getString(PROPERTY_REG_ID, "");
-        if (registrationId.isEmpty()) {
-            Log.i(TAG, "Registration not found.");
-            return "";
-        }
-        // Check if app was updated; if so, it must clear the registration ID
-        // since the existing regID is not guaranteed to work with the new
-        // app version.
-        int registeredVersion = prefs.getInt(PROPERTY_APP_VERSION, Integer.MIN_VALUE);
-        int currentVersion = getAppVersion(context);
-        if (registeredVersion != currentVersion) {
-            Log.i(TAG, "App version changed.");
-            return "";
-        }
-        return registrationId;
-    }
-
-    /**
      * @return Application's {@code SharedPreferences}.
      */
     private SharedPreferences getGCMPreferences(Context context) {
@@ -473,20 +402,6 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
         // how you store the regID in your app is up to you.
         return getSharedPreferences(MainActivity.class.getSimpleName(),
                 Context.MODE_PRIVATE);
-    }
-
-    /**
-     * @return Application's version code from the {@code PackageManager}.
-     */
-    private static int getAppVersion(Context context) {
-        try {
-            PackageInfo packageInfo = context.getPackageManager()
-                    .getPackageInfo(context.getPackageName(), 0);
-            return packageInfo.versionCode;
-        } catch (PackageManager.NameNotFoundException e) {
-            // should never happen
-            throw new RuntimeException("Could not get package name: " + e);
-        }
     }
 
 
@@ -516,5 +431,6 @@ public class MainActivity extends Activity implements GooglePlayServicesClient.C
         }
         return session;
     }
+
 
 }

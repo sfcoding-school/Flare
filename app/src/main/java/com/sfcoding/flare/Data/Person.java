@@ -74,4 +74,9 @@ public class Person {
     public Bitmap getPhoto() {
         return this.photo;
     }
+
+    public void updatePos(double newLat, double newLng){
+        setLastLat(newLat);
+        setLastLng(newLng);
+    }
 }
